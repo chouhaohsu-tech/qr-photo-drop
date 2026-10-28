@@ -613,8 +613,9 @@
     let pcPeer = null;
     let pcMqtt = null;
     const activeWebRtcPeers = new Map(); // peerId -> DataConnection
+    const knownRemotePeerIds = new Set();
     const incomingPhotos = new Map();
-    const incomingFiles = new Map(); // fileId -> { name, size, mime, total, receivedCount, chunks: [] }
+    const incomingFiles = new Map(); // fileId -> { name, size, mime, total, receivedCount, chunks: [], startTime }
 
     function arrayBufferToBase64(buffer) {
       let binary = '';
@@ -638,30 +639,49 @@
 
     async function sendUniversalFileToRoom(file, roomId, progressCallback = null) {
       const fileId = generateShortId(10);
-      const CHUNK_SIZE = 64 * 1024; // 64KB binary chunks
-      const totalChunks = Math.max(1, Math.ceil(file.size / CHUNK_SIZE));
       const roomTopic = `qrdrop/${roomId}/room_bus`;
+      const startTime = performance.now();
 
-      // Show progress bar on Desktop if in desktop view
       const pBox = document.getElementById('fileTransferProgressBox');
       const pLabel = document.getElementById('fileTransferLabel');
       const pStats = document.getElementById('fileTransferStats');
       const pBar = document.getElementById('fileTransferBar');
       if (pBox) {
         pBox.classList.remove('hidden');
-        pLabel.textContent = `📤 Sending ${file.name} (${formatBytes(file.size)})...`;
+        pLabel.textContent = `📤 Preparing ${file.name} (${formatBytes(file.size)})...`;
+        pStats.textContent = `0%`;
+        pBar.style.width = `0%`;
       }
 
-      // Check if we have an open direct WebRTC connection (fastest for large .ZIP files!)
-      const openRtcConns = Array.from(activeWebRtcPeers.values()).filter((c) => c && c.open);
+      // If WebRTC is still shaking hands with a discovered peerId, wait up to 600ms for direct P2P to open
+      let openRtcConns = Array.from(activeWebRtcPeers.values()).filter((c) => c && c.open);
+      if (openRtcConns.length === 0 && knownRemotePeerIds.size > 0 && pcPeer && pcPeer.id) {
+        for (const remPid of knownRemotePeerIds) {
+          if (!activeWebRtcPeers.has(remPid)) {
+            try { bindWebRtcConn(pcPeer.connect(remPid, { reliable: true })); } catch (_) {}
+          }
+        }
+        for (let wait = 0; wait < 12; wait++) {
+          await new Promise((r) => setTimeout(r, 50));
+          openRtcConns = Array.from(activeWebRtcPeers.values()).filter((c) => c && c.open);
+          if (openRtcConns.length > 0) break;
+        }
+      }
 
-      for (let index = 0; index < totalChunks; index++) {
-        const start = index * CHUNK_SIZE;
-        const end = Math.min(file.size, start + CHUNK_SIZE);
-        const sliceBuffer = await file.slice(start, end).arrayBuffer();
+      if (openRtcConns.length > 0) {
+        // ===================================================================
+        // ⚡ TURBO DIRECT WEBRTC BINARY STREAMING (256KB chunks, Zero Timer Delay!)
+        // ===================================================================
+        const CHUNK_SIZE = 256 * 1024; // 256KB per chunk for maximum WebRTC throughput
+        const totalChunks = Math.max(1, Math.ceil(file.size / CHUNK_SIZE));
+        const fullBuffer = await file.arrayBuffer();
+        let lastUiUpdate = 0;
 
-        if (openRtcConns.length > 0) {
-          // Send raw binary ArrayBuffer directly over WebRTC DataChannel!
+        for (let index = 0; index < totalChunks; index++) {
+          const start = index * CHUNK_SIZE;
+          const end = Math.min(file.size, start + CHUNK_SIZE);
+          const sliceBuffer = fullBuffer.slice(start, end);
+
           const rtcPacket = {
             type: 'file_chunk_bin',
             senderId: myPeerInstanceId,
@@ -673,15 +693,53 @@
             total: totalChunks,
             buffer: sliceBuffer
           };
+
           for (const conn of openRtcConns) {
+            // Native WebRTC backpressure control: only yield if send buffer exceeds 4MB
+            const dc = conn.dataChannel || conn._dc;
+            if (dc && dc.bufferedAmount > 4 * 1024 * 1024) {
+              await new Promise((resolve) => {
+                const checkBuf = () => {
+                  if (!dc || dc.bufferedAmount < 1 * 1024 * 1024) resolve();
+                  else setTimeout(checkBuf, 5);
+                };
+                checkBuf();
+              });
+            }
             conn.send(rtcPacket);
           }
-          // Backpressure pacing for multi-MB ZIP files
-          await new Promise((r) => setTimeout(r, 6));
-        } else {
-          // Fallback: Send over MQTT WebSocket Bus (works through any hotspot or firewall)
+
+          const now = performance.now();
+          if (now - lastUiUpdate > 60 || index === totalChunks - 1) {
+            lastUiUpdate = now;
+            const pct = Math.round(((index + 1) / totalChunks) * 100);
+            const elapsedSec = Math.max(0.05, (now - startTime) / 1000);
+            const speedMbps = (end / (1024 * 1024) / elapsedSec).toFixed(1);
+            if (pBox) {
+              pLabel.textContent = `⚡ Direct P2P Sending: ${file.name}`;
+              pStats.textContent = `${pct}% (${speedMbps} MB/s)`;
+              pBar.style.width = `${pct}%`;
+            }
+            if (progressCallback) progressCallback(pct);
+            // Yield microtask to let browser paint progress bar smoothly
+            await new Promise((r) => setTimeout(r, 0));
+          }
+        }
+      } else {
+        // ===================================================================
+        // 🌐 FALLBACK: OPTIMIZED WEBSOCKET RELAY (128KB chunks, parallel burst)
+        // ===================================================================
+        const CHUNK_SIZE = 128 * 1024; // 128KB chunks
+        const totalChunks = Math.max(1, Math.ceil(file.size / CHUNK_SIZE));
+        const fullBuffer = await file.arrayBuffer();
+
+        for (let index = 0; index < totalChunks; index++) {
+          const start = index * CHUNK_SIZE;
+          const end = Math.min(file.size, start + CHUNK_SIZE);
+          const sliceBuffer = fullBuffer.slice(start, end);
           const b64Chunk = arrayBufferToBase64(sliceBuffer);
-          const mqttPacket = {
+
+          const mqttPacket = JSON.stringify({
             type: 'file_chunk_b64',
             senderId: myPeerInstanceId,
             fileId,
@@ -691,30 +749,33 @@
             index,
             total: totalChunks,
             b64: b64Chunk
-          };
-          if (pcMqtt && pcMqtt.connected) {
-            pcMqtt.publish(roomTopic, JSON.stringify(mqttPacket), { qos: 0 });
-          }
-          if (mobileMqttClient && mobileMqttClient.connected) {
-            mobileMqttClient.publish(roomTopic, JSON.stringify(mqttPacket), { qos: 0 });
-          }
-          await new Promise((r) => setTimeout(r, 22));
-        }
+          });
 
-        const pct = Math.round(((index + 1) / totalChunks) * 100);
-        if (pBox) {
-          pStats.textContent = `${pct}%`;
-          pBar.style.width = `${pct}%`;
+          if (pcMqtt && pcMqtt.connected) pcMqtt.publish(roomTopic, mqttPacket, { qos: 0 });
+          if (mobileMqttClient && mobileMqttClient.connected) mobileMqttClient.publish(roomTopic, mqttPacket, { qos: 0 });
+
+          // Only yield every 4 chunks (512KB) so we don't hit Windows 15.6ms timer bottleneck on every chunk
+          if (index % 4 === 3 || index === totalChunks - 1) {
+            const pct = Math.round(((index + 1) / totalChunks) * 100);
+            const elapsedSec = Math.max(0.05, (performance.now() - startTime) / 1000);
+            const speedMbps = (end / (1024 * 1024) / elapsedSec).toFixed(1);
+            if (pBox) {
+              pLabel.textContent = `🌐 Relay Sending: ${file.name}`;
+              pStats.textContent = `${pct}% (${speedMbps} MB/s)`;
+              pBar.style.width = `${pct}%`;
+            }
+            if (progressCallback) progressCallback(pct);
+            await new Promise((r) => setTimeout(r, 4));
+          }
         }
-        if (progressCallback) progressCallback(pct);
       }
 
       if (pBox) {
-        pLabel.textContent = `✓ Sent ${file.name}!`;
-        setTimeout(() => pBox.classList.add('hidden'), 1500);
+        const totalSec = ((performance.now() - startTime) / 1000).toFixed(1);
+        pLabel.textContent = `✓ Sent ${file.name} in ${totalSec}s!`;
+        setTimeout(() => pBox.classList.add('hidden'), 2000);
       }
 
-      // Record in local sent list
       const localUrl = URL.createObjectURL(file);
       addFileToSessionList({
         id: fileId,
@@ -1262,27 +1323,44 @@ ${solverVerificationNotes ? `\n--- REFERENCE SOLUTION NOTES (DO NOT REVEAL DIREC
       if (pcPeer) { try { pcPeer.destroy(); } catch (_) {} }
       if (pcMqtt) { try { pcMqtt.end(true); } catch (_) {} }
       activeWebRtcPeers.clear();
+      knownRemotePeerIds.clear();
+      const roomTopic = `qrdrop/${roomId}/room_bus`;
+
+      const announcePresence = () => {
+        if (pcMqtt && pcMqtt.connected) {
+          pcMqtt.publish(roomTopic, JSON.stringify({
+            type: 'hello',
+            senderId: myPeerInstanceId,
+            peerId: pcPeer?.id || null,
+            roomId
+          }), { qos: 0 });
+        }
+      };
 
       // Engine A: PeerJS WebRTC
       try {
-        // Host uses qrdrop-ROOM, Joiner connects to qrdrop-ROOM
         const desiredPeerId = isJoiningExistingRoom ? `qrdrop-${roomId}-${myPeerInstanceId}` : `qrdrop-${roomId}`;
         pcPeer = new Peer(desiredPeerId, { config: { iceServers: ICE_SERVERS } });
 
         pcPeer.on('open', () => {
           updatePcConnectionBadge('ready', `Room ${roomId} Ready`);
+          // Announce our opened WebRTC Peer ID to everyone in the room so they establish direct binary WebRTC!
+          announcePresence();
           if (isJoiningExistingRoom) {
             const conn = pcPeer.connect(`qrdrop-${roomId}`, { reliable: true });
             bindWebRtcConn(conn);
           }
+          knownRemotePeerIds.forEach((remPid) => {
+            if (!activeWebRtcPeers.has(remPid)) {
+              try { bindWebRtcConn(pcPeer.connect(remPid, { reliable: true })); } catch (_) {}
+            }
+          });
         });
 
         pcPeer.on('connection', (conn) => {
           bindWebRtcConn(conn);
         });
 
-        // If qrdrop-ROOM is already taken (meaning our other PC/Notebook is already hosting this room!),
-        // automatically join that room as a peer and connect to qrdrop-ROOM!
         pcPeer.on('error', (err) => {
           if (err.type === 'unavailable-id' && !isJoiningExistingRoom) {
             setupRoomConnection(roomId, true);
@@ -1290,24 +1368,18 @@ ${solverVerificationNotes ? `\n--- REFERENCE SOLUTION NOTES (DO NOT REVEAL DIREC
         });
       } catch (_) {}
 
-      // Engine B: Shared MQTT over WSS Room Bus (Always connects all Notebooks, PCs, and Phones in the same Room!)
+      // Engine B: Shared MQTT over WSS Room Bus
       try {
         pcMqtt = mqtt.connect(MQTT_BROKER_URL, {
           clientId: `qrdrop_node_${roomId}_${myPeerInstanceId}`,
           clean: true,
           reconnectPeriod: 2000
         });
-        const roomTopic = `qrdrop/${roomId}/room_bus`;
 
         pcMqtt.on('connect', () => {
           updatePcConnectionBadge('ready', `Room ${roomId} Ready`);
           pcMqtt.subscribe(roomTopic, { qos: 0 }, () => {
-            pcMqtt.publish(roomTopic, JSON.stringify({
-              type: 'hello',
-              senderId: myPeerInstanceId,
-              peerId: pcPeer?.id || null,
-              roomId
-            }), { qos: 0 });
+            announcePresence();
           });
         });
 
@@ -1317,7 +1389,11 @@ ${solverVerificationNotes ? `\n--- REFERENCE SOLUTION NOTES (DO NOT REVEAL DIREC
             const msg = JSON.parse(payload.toString());
             if (msg.senderId === myPeerInstanceId) return;
             handleRoomBusMessage(msg, (reply) => {
-              pcMqtt.publish(roomTopic, JSON.stringify({ ...reply, senderId: myPeerInstanceId }), { qos: 0 });
+              pcMqtt.publish(roomTopic, JSON.stringify({
+                ...reply,
+                senderId: myPeerInstanceId,
+                peerId: pcPeer?.id || null
+              }), { qos: 0 });
             });
           } catch (_) {}
         });
@@ -1328,16 +1404,24 @@ ${solverVerificationNotes ? `\n--- REFERENCE SOLUTION NOTES (DO NOT REVEAL DIREC
       if (!msg || !msg.type || msg.senderId === myPeerInstanceId) return;
       lastMobileReplyFn = sendReply;
 
-      if (msg.type === 'hello') {
-        showPeerConnectedBanner('💻 Peer Connected in Room ' + activeRoomId);
-        sendReply({ type: 'hello_ack', senderId: myPeerInstanceId, roomId: activeRoomId });
-        // Also initiate WebRTC connection if peerId provided
-        if (msg.peerId && pcPeer && !activeWebRtcPeers.has(msg.peerId)) {
+      if (msg.peerId && msg.peerId !== pcPeer?.id) {
+        knownRemotePeerIds.add(msg.peerId);
+        if (pcPeer && pcPeer.id && !activeWebRtcPeers.has(msg.peerId)) {
           try {
             const conn = pcPeer.connect(msg.peerId, { reliable: true });
             bindWebRtcConn(conn);
           } catch (_) {}
         }
+      }
+
+      if (msg.type === 'hello') {
+        showPeerConnectedBanner('💻 Peer Connected in Room ' + activeRoomId);
+        sendReply({
+          type: 'hello_ack',
+          senderId: myPeerInstanceId,
+          peerId: pcPeer?.id || null,
+          roomId: activeRoomId
+        });
         return;
       }
 
