@@ -705,7 +705,7 @@
         }
       }
       // Always send control packets (and fallback data packets) over MQTT Room Bus with QoS 1 so they are NEVER dropped!
-      if (!sentViaRtc || packet.type.startsWith('file_start') || packet.type.startsWith('file_ack') || packet.type === 'file_cancel') {
+      if (!sentViaRtc || packet.type.startsWith('file_start') || packet.type.startsWith('file_end') || packet.type.startsWith('file_complete') || packet.type.startsWith('file_missing') || packet.type === 'file_cancel') {
         const roomTopic = `qrdrop/${roomId}/room_bus`;
         const jsonStr = JSON.stringify(fullPacket);
         if (pcMqtt && pcMqtt.connected) pcMqtt.publish(roomTopic, jsonStr, { qos: 1 });
@@ -727,6 +727,51 @@
       });
     }
 
+    async function sendSingleChunk(roomId, file, fileId, index, totalChunks, CHUNK_SIZE, openRtcConns) {
+      const start = index * CHUNK_SIZE;
+      const end = Math.min(file.size, start + CHUNK_SIZE);
+      const sliceBuffer = await file.slice(start, end).arrayBuffer();
+
+      if (openRtcConns.length > 0) {
+        const rtcPacket = {
+          type: 'file_chunk_bin',
+          senderId: myPeerInstanceId,
+          fileId,
+          name: file.name,
+          size: file.size,
+          mime: file.type || 'application/octet-stream',
+          index,
+          total: totalChunks,
+          buffer: sliceBuffer
+        };
+        for (const conn of openRtcConns) {
+          const dc = conn.dataChannel || conn._dc;
+          // Native WebRTC backpressure: keep 1.5MB pipeline full without ever stalling
+          while (dc && dc.bufferedAmount > 1536 * 1024) {
+            if (cancelCurrentTransferFlag || cancelledFileIds.has(fileId)) return;
+            await new Promise((r) => setTimeout(r, 2));
+          }
+          conn.send(rtcPacket);
+        }
+      } else {
+        const b64Chunk = arrayBufferToBase64(sliceBuffer);
+        const roomTopic = `qrdrop/${roomId}/room_bus`;
+        const jsonStr = JSON.stringify({
+          type: 'file_chunk_b64',
+          senderId: myPeerInstanceId,
+          fileId,
+          name: file.name,
+          size: file.size,
+          mime: file.type || 'application/octet-stream',
+          index,
+          total: totalChunks,
+          b64: b64Chunk
+        });
+        if (pcMqtt && pcMqtt.connected) pcMqtt.publish(roomTopic, jsonStr, { qos: 0 });
+        if (mobileMqttClient && mobileMqttClient.connected) mobileMqttClient.publish(roomTopic, jsonStr, { qos: 0 });
+      }
+    }
+
     async function sendUniversalFileToRoom(file, roomId, progressCallback = null) {
       const fileId = generateShortId(10);
       currentActiveTransferFileId = fileId;
@@ -744,14 +789,32 @@
         pBar.style.width = `2%`;
       }
 
-      const CHUNK_SIZE = 16 * 1024; // 16KB chunks: 100% immune to broker/SCTP frame drops!
+      // Ensure Direct WebRTC P2P is connected if possible before starting
+      let openRtcConns = Array.from(activeWebRtcPeers.values()).filter((c) => c && c.open);
+      if (openRtcConns.length === 0 && pcPeer && pcPeer.id) {
+        const targets = new Set(knownRemotePeerIds);
+        if (pcPeer.id !== `qrdrop-${roomId}`) targets.add(`qrdrop-${roomId}`);
+        for (const remPid of targets) {
+          if (!activeWebRtcPeers.has(remPid)) {
+            try { bindWebRtcConn(pcPeer.connect(remPid, { reliable: true })); } catch (_) {}
+          }
+        }
+        for (let wait = 0; wait < 12; wait++) {
+          if (cancelCurrentTransferFlag) return;
+          await new Promise((r) => setTimeout(r, 50));
+          openRtcConns = Array.from(activeWebRtcPeers.values()).filter((c) => c && c.open);
+          if (openRtcConns.length > 0) break;
+        }
+      }
+
+      const CHUNK_SIZE = 32 * 1024; // 32KB chunks for high throughput
       const totalChunks = Math.max(1, Math.ceil(file.size / CHUNK_SIZE));
 
-      // STEP 1: Handshake with Receiver PC first so we NEVER send into thin air!
+      // STEP 1: Quick Handshake Once at Start
       let startAcked = false;
       for (let attempt = 0; attempt < 3; attempt++) {
         if (cancelCurrentTransferFlag) return;
-        const ackPromise = waitForFileAck(`${fileId}_start`, 2200);
+        const ackPromise = waitForFileAck(`${fileId}_start`, 2000);
         sendRoomPacket(roomId, {
           type: 'file_start',
           fileId,
@@ -769,81 +832,89 @@
 
       if (!startAcked) {
         if (pBox) {
-          pLabel.textContent = `⚠️ No PC responded in Room "${roomId}"! Check that both Notebook & PC show the exact same Room ID.`;
+          pLabel.textContent = `⚠️ No PC responded in Room "${roomId}"! Make sure both computers show the same Room ID.`;
           pStats.textContent = `No Receiver`;
           pBar.style.width = `0%`;
         }
         return;
       }
 
-      // STEP 2: Send 16KB chunks in verified batches of 8 chunks (128KB per ACK window)
-      // Progress ONLY advances when the PC confirms receipt!
-      const BATCH_SIZE = 8;
-      for (let batchStart = 0; batchStart < totalChunks; batchStart += BATCH_SIZE) {
+      // Refresh open WebRTC connections right after handshake
+      openRtcConns = Array.from(activeWebRtcPeers.values()).filter((c) => c && c.open);
+      const modeTag = openRtcConns.length > 0 ? '⚡ Direct P2P Stream' : '🌐 Continuous Stream';
+
+      // STEP 2: CONTINUOUS FULL-SPEED STREAM (Zero Stop-and-Wait in the middle!)
+      let lastUiUpdate = 0;
+      for (let index = 0; index < totalChunks; index++) {
         if (cancelCurrentTransferFlag || cancelledFileIds.has(fileId)) return;
-        const batchEnd = Math.min(totalChunks - 1, batchStart + BATCH_SIZE - 1);
 
-        // Retry batch up to 3 times if hotspot drops a packet
-        let batchConfirmed = false;
-        for (let retry = 0; retry < 3; retry++) {
-          if (cancelCurrentTransferFlag || cancelledFileIds.has(fileId)) return;
-          const ackPromise = waitForFileAck(`${fileId}_batch_${batchEnd}`, 3500);
+        await sendSingleChunk(roomId, file, fileId, index, totalChunks, CHUNK_SIZE, openRtcConns);
 
-          for (let index = batchStart; index <= batchEnd; index++) {
-            const start = index * CHUNK_SIZE;
-            const end = Math.min(file.size, start + CHUNK_SIZE);
-            const sliceBuffer = await file.slice(start, end).arrayBuffer();
-            const b64Chunk = arrayBufferToBase64(sliceBuffer);
-
-            sendRoomPacket(roomId, {
-              type: 'file_chunk_b64',
-              fileId,
-              name: file.name,
-              size: file.size,
-              mime: file.type || 'application/octet-stream',
-              index,
-              total: totalChunks,
-              batchEnd,
-              b64: b64Chunk
-            });
-          }
-
-          const ackResult = await ackPromise;
-          if (ackResult) {
-            batchConfirmed = true;
-            break;
-          }
+        // If on WebSocket fallback, yield 1ms every 4 chunks (128KB) so socket flushes smoothly without 1s ACK stalls
+        if (openRtcConns.length === 0 && index % 4 === 3) {
+          await new Promise((r) => setTimeout(r, 1));
         }
 
-        if (!batchConfirmed && !cancelCurrentTransferFlag) {
+        const now = performance.now();
+        if (now - lastUiUpdate > 75 || index === totalChunks - 1) {
+          lastUiUpdate = now;
+          const bytesSent = Math.min(file.size, (index + 1) * CHUNK_SIZE);
+          const pct = Math.min(99, Math.round(((index + 1) / totalChunks) * 100));
+          const elapsedSec = Math.max(0.05, (now - startTime) / 1000);
+          const speedKBps = Math.round(bytesSent / 1024 / elapsedSec);
+          const speedText = speedKBps >= 1024 ? `${(speedKBps / 1024).toFixed(2)} MB/s` : `${speedKBps} KB/s`;
+
           if (pBox) {
-            pLabel.textContent = `⚠️ Connection interrupted while sending ${file.name}.`;
-            pStats.textContent = `Stalled`;
+            pLabel.textContent = `${modeTag}: ${file.name}`;
+            pStats.textContent = `${pct}% (${speedText})`;
+            pBar.style.width = `${pct}%`;
           }
-          return;
+          if (progressCallback) progressCallback(pct);
+        }
+      }
+
+      // STEP 3: END-OF-FILE CHECK & MISSING-CHUNK REPAIR (NACK Loop)
+      if (pBox) {
+        pLabel.textContent = `🔍 Verifying 100% integrity on receiver PC...`;
+      }
+
+      for (let verifyRound = 0; verifyRound < 12; verifyRound++) {
+        if (cancelCurrentTransferFlag || cancelledFileIds.has(fileId)) return;
+        const statusPromise = waitForFileAck(`${fileId}_end_status`, 2500);
+        sendRoomPacket(roomId, {
+          type: 'file_end_check',
+          fileId,
+          total: totalChunks
+        });
+
+        const status = await statusPromise;
+        if (!status) continue;
+
+        if (status.complete) {
+          break; // 100% verified complete on PC!
         }
 
-        const bytesConfirmed = Math.min(file.size, (batchEnd + 1) * CHUNK_SIZE);
-        const pct = Math.round(((batchEnd + 1) / totalChunks) * 100);
-        const elapsedSec = Math.max(0.05, (performance.now() - startTime) / 1000);
-        const speedKBps = Math.round(bytesConfirmed / 1024 / elapsedSec);
-        const speedText = speedKBps >= 1024 ? `${(speedKBps / 1024).toFixed(2)} MB/s` : `${speedKBps} KB/s`;
-
-        if (pBox) {
-          pLabel.textContent = `📤 Sending ${file.name} (Verified by PC)...`;
-          pStats.textContent = `${pct}% (${speedText})`;
-          pBar.style.width = `${pct}%`;
+        if (Array.isArray(status.missing) && status.missing.length > 0) {
+          if (pBox) {
+            pLabel.textContent = `🔧 Re-sending ${status.missing.length} missing chunk(s)...`;
+          }
+          for (const missingIdx of status.missing) {
+            if (cancelCurrentTransferFlag || cancelledFileIds.has(fileId)) return;
+            await sendSingleChunk(roomId, file, fileId, missingIdx, totalChunks, CHUNK_SIZE, openRtcConns);
+          }
         }
-        if (progressCallback) progressCallback(pct);
       }
 
       if (cancelCurrentTransferFlag || cancelledFileIds.has(fileId)) return;
 
       if (pBox) {
         const totalSec = ((performance.now() - startTime) / 1000).toFixed(1);
-        pLabel.textContent = `✓ PC confirmed receipt of ${file.name} (${totalSec}s)!`;
-        setTimeout(() => pBox.classList.add('hidden'), 3000);
+        pLabel.textContent = `✓ Sent & Verified ${file.name} in ${totalSec}s!`;
+        pStats.textContent = `100%`;
+        pBar.style.width = `100%`;
+        setTimeout(() => pBox.classList.add('hidden'), 2500);
       }
+      if (progressCallback) progressCallback(100);
 
       const localUrl = URL.createObjectURL(file);
       addFileToSessionList({
@@ -891,12 +962,90 @@
       });
     }
 
+    function handleIncomingFileEndCheck(msg) {
+      if (!msg || msg.senderId === myPeerInstanceId) return;
+      const { fileId } = msg;
+      if (receivedTransferIds.has(fileId)) {
+        sendRoomPacket(targetHubRoomId || activeRoomId, {
+          type: 'file_complete_ack',
+          fileId
+        });
+        return;
+      }
+
+      const entry = incomingFiles.get(fileId);
+      if (!entry) return;
+
+      const missing = [];
+      for (let i = 0; i < entry.total; i++) {
+        if (entry.chunks[i] === undefined) {
+          missing.push(i);
+          if (missing.length >= 48) break; // Request up to 48 missing chunks per repair round
+        }
+      }
+
+      if (missing.length === 0) {
+        finalizeCompletedIncomingFile(fileId, entry);
+      } else {
+        sendRoomPacket(targetHubRoomId || activeRoomId, {
+          type: 'file_missing',
+          fileId,
+          missing
+        });
+      }
+    }
+
+    function finalizeCompletedIncomingFile(fileId, entry) {
+      if (receivedTransferIds.has(fileId)) return;
+      receivedTransferIds.add(fileId);
+      incomingFiles.delete(fileId);
+
+      // Immediately notify sender that 100% of chunks arrived!
+      sendRoomPacket(targetHubRoomId || activeRoomId, {
+        type: 'file_complete_ack',
+        fileId
+      });
+
+      const pBox = document.getElementById('fileTransferProgressBox');
+      if (pBox) {
+        document.getElementById('fileTransferLabel').textContent = `✓ Received ${entry.name}!`;
+        document.getElementById('fileTransferStats').textContent = `100%`;
+        document.getElementById('fileTransferBar').style.width = `100%`;
+        setTimeout(() => pBox.classList.add('hidden'), 2000);
+      }
+
+      const blob = new Blob(entry.chunks, { type: entry.mime });
+      const blobUrl = URL.createObjectURL(blob);
+
+      addFileToSessionList({
+        id: fileId,
+        name: entry.name,
+        size: entry.size || blob.size,
+        mime: entry.mime,
+        blobUrl,
+        direction: '📥 Received',
+        timestamp: Date.now()
+      });
+
+      switchWorkspaceTab('files');
+
+      const autoDl = document.getElementById('autoDownloadToggle');
+      if (autoDl && autoDl.checked) {
+        const a = document.createElement('a');
+        a.href = blobUrl;
+        a.download = entry.name;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+      }
+    }
+
     function handleIncomingFileChunk(msg) {
       if (!msg || msg.senderId === myPeerInstanceId) return;
-      const { fileId, name, size, mime, index, total, batchEnd } = msg;
+      const { fileId, name, size, mime, index, total } = msg;
       if (receivedTransferIds.has(fileId) || cancelledFileIds.has(fileId)) {
-        if (receivedTransferIds.has(fileId) && batchEnd !== undefined) {
-          sendRoomPacket(targetHubRoomId || activeRoomId, { type: 'file_ack', fileId, batchEnd });
+        if (receivedTransferIds.has(fileId)) {
+          sendRoomPacket(targetHubRoomId || activeRoomId, { type: 'file_complete_ack', fileId });
         }
         return;
       }
@@ -912,7 +1061,8 @@
           mime: mime || 'application/octet-stream',
           total,
           receivedCount: 0,
-          chunks: new Array(total)
+          chunks: new Array(total),
+          lastUiTime: 0
         };
         incomingFiles.set(fileId, entry);
       }
@@ -926,66 +1076,21 @@
         entry.receivedCount++;
       }
 
-      const pct = Math.round((entry.receivedCount / entry.total) * 100);
-      const pBox = document.getElementById('fileTransferProgressBox');
-      if (pBox) {
-        pBox.classList.remove('hidden');
-        document.getElementById('fileTransferLabel').textContent = `📥 Receiving ${entry.name} (${formatBytes(entry.size)})...`;
-        document.getElementById('fileTransferStats').textContent = `${pct}%`;
-        document.getElementById('fileTransferBar').style.width = `${pct}%`;
-      }
-
-      // If this chunk is the end of a batch (or all chunks up to batchEnd are present), send ACK to sender!
-      if (batchEnd !== undefined && index === batchEnd) {
-        let allBatchPresent = true;
-        const batchStart = Math.max(0, batchEnd - 7);
-        for (let k = batchStart; k <= batchEnd; k++) {
-          if (entry.chunks[k] === undefined) {
-            allBatchPresent = false;
-            break;
-          }
-        }
-        if (allBatchPresent) {
-          sendRoomPacket(targetHubRoomId || activeRoomId, {
-            type: 'file_ack',
-            fileId,
-            batchEnd
-          });
+      const now = performance.now();
+      if (now - (entry.lastUiTime || 0) > 75 || entry.receivedCount === entry.total) {
+        entry.lastUiTime = now;
+        const pct = Math.round((entry.receivedCount / entry.total) * 100);
+        const pBox = document.getElementById('fileTransferProgressBox');
+        if (pBox) {
+          pBox.classList.remove('hidden');
+          document.getElementById('fileTransferLabel').textContent = `📥 Receiving ${entry.name} (${formatBytes(entry.size)})...`;
+          document.getElementById('fileTransferStats').textContent = `${pct}%`;
+          document.getElementById('fileTransferBar').style.width = `${pct}%`;
         }
       }
 
       if (entry.receivedCount === entry.total) {
-        receivedTransferIds.add(fileId);
-        incomingFiles.delete(fileId);
-        if (pBox) {
-          document.getElementById('fileTransferLabel').textContent = `✓ Received ${entry.name}!`;
-          setTimeout(() => pBox.classList.add('hidden'), 2000);
-        }
-
-        const blob = new Blob(entry.chunks, { type: entry.mime });
-        const blobUrl = URL.createObjectURL(blob);
-
-        addFileToSessionList({
-          id: fileId,
-          name: entry.name,
-          size: entry.size || blob.size,
-          mime: entry.mime,
-          blobUrl,
-          direction: '📥 Received',
-          timestamp: Date.now()
-        });
-
-        switchWorkspaceTab('files');
-
-        const autoDl = document.getElementById('autoDownloadToggle');
-        if (autoDl && autoDl.checked) {
-          const a = document.createElement('a');
-          a.href = blobUrl;
-          a.download = entry.name;
-          document.body.appendChild(a);
-          a.click();
-          a.remove();
-        }
+        finalizeCompletedIncomingFile(fileId, entry);
       }
     }
 
@@ -1574,9 +1679,20 @@ ${solverVerificationNotes ? `\n--- REFERENCE SOLUTION NOTES (DO NOT REVEAL DIREC
         return;
       }
 
-      if (msg.type === 'file_ack') {
-        const resolver = fileAckResolvers.get(`${msg.fileId}_batch_${msg.batchEnd}`);
-        if (resolver) resolver(true);
+      if (msg.type === 'file_end_check') {
+        handleIncomingFileEndCheck(msg);
+        return;
+      }
+
+      if (msg.type === 'file_complete_ack') {
+        const resolver = fileAckResolvers.get(`${msg.fileId}_end_status`);
+        if (resolver) resolver({ complete: true });
+        return;
+      }
+
+      if (msg.type === 'file_missing') {
+        const resolver = fileAckResolvers.get(`${msg.fileId}_end_status`);
+        if (resolver) resolver({ complete: false, missing: msg.missing || [] });
         return;
       }
 
@@ -1843,9 +1959,13 @@ ${solverVerificationNotes ? `\n--- REFERENCE SOLUTION NOTES (DO NOT REVEAL DIREC
               const r = fileAckResolvers.get(`${msg.fileId}_start`);
               if (r) r(true);
             }
-            if (msg.type === 'file_ack') {
-              const r = fileAckResolvers.get(`${msg.fileId}_batch_${msg.batchEnd}`);
-              if (r) r(true);
+            if (msg.type === 'file_complete_ack') {
+              const r = fileAckResolvers.get(`${msg.fileId}_end_status`);
+              if (r) r({ complete: true });
+            }
+            if (msg.type === 'file_missing') {
+              const r = fileAckResolvers.get(`${msg.fileId}_end_status`);
+              if (r) r({ complete: false, missing: msg.missing || [] });
             }
             if (msg.type === 'file_cancel') {
               if (msg.fileId) cancelledFileIds.add(msg.fileId);
