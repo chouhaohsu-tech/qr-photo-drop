@@ -4,8 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
-  <title>🎓 QR Socratic Math Tutor — Guided Step-by-Step AI Math Coach</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎓</text></svg>" />
+  <title>⚡ QR File & ZIP Drop + AI Math Tutor — Notebook ⇄ PC ⇄ Phone</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚡</text></svg>" />
 
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -27,18 +27,18 @@
     };
   </script>
 
-  <!-- PeerJS (WebRTC P2P) -->
+  <!-- PeerJS (WebRTC P2P Binary File & Photo Transfer) -->
   <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
-  <!-- MQTT.js (WebSocket Hotspot Fallback so it NEVER fails on phone hotspots) -->
+  <!-- MQTT.js (WebSocket Hotspot Fallback) -->
   <script src="https://unpkg.com/mqtt@5.10.1/dist/mqtt.min.js"></script>
   <!-- QRCode.js -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <!-- Cropper.js -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js"></script>
-  <!-- Marked.js for Markdown rendering -->
+  <!-- Marked.js -->
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-  <!-- KaTeX for beautiful math formula rendering -->
+  <!-- KaTeX -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" />
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
@@ -70,38 +70,42 @@
 <body class="bg-[#0b1120] text-slate-100 min-h-screen flex flex-col antialiased selection:bg-indigo-500 selection:text-white">
 
   <!-- ===================================================================== -->
-  <!-- 1. DESKTOP / MAIN SOCRATIC TUTOR HUB                                  -->
+  <!-- 1. MAIN UNIFIED VIEW (Works on PC, Notebook, and Mobile)              -->
   <!-- ===================================================================== -->
   <div id="desktopView" class="flex-1 flex flex-col min-h-screen">
-    <!-- Top Header -->
-    <header class="glass-card sticky top-0 z-30 border-b border-slate-800/80 px-4 sm:px-8 py-3.5">
+    <!-- Top Header with Mode Switcher -->
+    <header class="glass-card sticky top-0 z-30 border-b border-slate-800/80 px-4 sm:px-8 py-3">
       <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
         <div class="flex items-center space-x-3">
           <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-xl shadow-lg shadow-indigo-500/25">
-            🎓
+            ⚡
           </div>
           <div>
             <div class="flex items-center space-x-2">
-              <h1 class="font-bold text-lg sm:text-xl text-white tracking-tight">Socratic AI Math Tutor <span class="text-indigo-400">× QR Drop</span></h1>
-              <span class="px-2 py-0.5 text-[11px] font-semibold rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
-                ⚡ Turbo Streaming
-              </span>
+              <h1 class="font-bold text-base sm:text-lg text-white tracking-tight">QR Drop Hub <span class="text-indigo-400">Notebook ⇄ PC ⇄ Phone</span></h1>
             </div>
-            <p class="text-xs text-slate-400">Snap a math problem or your handwritten work via QR code — AI guides you step by step without spoiling the answer</p>
+            <p class="text-[11px] text-slate-400">Direct P2P ZIP / File Transfer &amp; Socratic AI Math Tutor</p>
           </div>
         </div>
 
-        <!-- Connection Status & Actions -->
+        <!-- Mode Tabs: File Transfer vs AI Math Tutor -->
+        <div class="flex items-center bg-slate-900/90 p-1 rounded-xl border border-slate-800">
+          <button id="tabFileDropBtn" class="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-indigo-600 text-white shadow transition flex items-center gap-1.5">
+            <span>📦</span>
+            <span>File &amp; ZIP Transfer (Notebook ⇄ PC)</span>
+          </button>
+          <button id="tabMathTutorBtn" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition flex items-center gap-1.5">
+            <span>🎓</span>
+            <span>AI Math Tutor &amp; Vision</span>
+          </button>
+        </div>
+
+        <!-- Connection Status Badge -->
         <div class="flex items-center space-x-3">
           <div id="pcConnectionBadge" class="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium bg-amber-500/10 text-amber-300 border border-amber-500/25">
             <span class="w-2 h-2 rounded-full bg-amber-400 mr-2 animate-pulse"></span>
             <span id="pcConnectionText">Initializing tunnel...</span>
           </div>
-
-          <button id="newProblemBtn" class="inline-flex items-center space-x-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition">
-            <span>🔄</span>
-            <span>Reset / New Problem</span>
-          </button>
         </div>
       </div>
     </header>
@@ -109,14 +113,73 @@
     <!-- Main Content Grid -->
     <main class="max-w-7xl w-full mx-auto flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6 p-4 sm:p-6">
       
-      <!-- Left Column: Settings + QR Code + Upload Controls (4 cols) -->
+      <!-- ================================================================= -->
+      <!-- LEFT SIDEBAR: PAIRING (ROOM CODE + QR CODE)                       -->
+      <!-- ================================================================= -->
       <section class="lg:col-span-4 space-y-5">
 
-        <!-- ✨ Gemini AI Configuration Card -->
+        <!-- 🔗 Connect Notebook & PC by Room Code OR QR Code -->
         <div class="glass-card rounded-2xl p-5 shadow-xl border border-indigo-500/30">
-          <div class="flex items-center justify-between mb-2.5">
+          <div class="flex items-center justify-between mb-2">
             <h2 class="text-xs font-bold uppercase tracking-wider text-indigo-300 flex items-center gap-1.5">
-              <span>⚙️</span> AI Tutor Settings
+              <span>💻</span> Connect Notebook ⇄ PC
+            </h2>
+            <button id="refreshRoomBtn" title="Generate new room code" class="text-[11px] text-slate-400 hover:text-white px-2 py-0.5 rounded-lg hover:bg-slate-800 transition">
+              🔄 New Room
+            </button>
+          </div>
+
+          <p class="text-xs text-slate-400 mb-3 leading-relaxed">
+            To connect your <strong>Notebook and PC</strong>: open this same website on both computers, type the same <strong>Room ID</strong> below (or click Join), and drop any `.zip` or file!
+          </p>
+
+          <!-- Current Room ID Display + Join Another Room Input -->
+          <div class="bg-slate-900/90 border border-slate-700/80 rounded-xl p-3 space-y-2.5 mb-4">
+            <div class="flex items-center justify-between">
+              <span class="text-xs text-slate-400">Your Room ID:</span>
+              <div class="flex items-center gap-2">
+                <span id="roomIdLabel" class="font-mono text-base font-extrabold text-emerald-400 tracking-wider select-all">---</span>
+                <button id="copyUploadLinkBtn" class="px-2 py-1 rounded-lg bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-300 text-[11px] font-semibold transition">
+                  🔗 Copy Link
+                </button>
+              </div>
+            </div>
+
+            <div class="pt-2 border-t border-slate-800 flex items-center gap-2">
+              <input
+                id="joinRoomInput"
+                type="text"
+                placeholder="Enter other PC's Room ID..."
+                class="flex-1 bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-slate-100 placeholder-slate-500 font-mono focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              />
+              <button id="joinRoomBtn" class="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold transition shrink-0">
+                Join Room
+              </button>
+            </div>
+          </div>
+
+          <!-- QR Code for Phone Scanning -->
+          <div class="text-center">
+            <div class="text-[11px] text-slate-400 mb-2">Or scan with Phone Camera:</div>
+            <div class="bg-white p-3 rounded-2xl shadow-inner mx-auto w-fit qr-box relative">
+              <div id="mainQrContainer" class="w-[160px] h-[160px] flex items-center justify-center text-slate-400 text-xs">
+                Generating QR...
+              </div>
+            </div>
+          </div>
+
+          <!-- Connected Peers Indicator -->
+          <div id="connectedDevicesBanner" class="hidden mt-4 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/25 text-emerald-300 text-xs flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse shrink-0"></span>
+            <span id="connectedDevicesText" class="font-semibold">Peer Device Connected! Ready to transfer files</span>
+          </div>
+        </div>
+
+        <!-- ⚙️ AI Tutor Settings Card (Visible when in Math Tutor tab or anytime) -->
+        <div id="aiSettingsCard" class="glass-card rounded-2xl p-5 shadow-xl">
+          <div class="flex items-center justify-between mb-2.5">
+            <h2 class="text-xs font-bold uppercase tracking-wider text-purple-300 flex items-center gap-1.5">
+              <span>⚙️</span> Gemini AI Settings
             </h2>
             <span id="apiKeyStatusBadge" class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-500/15 text-amber-300 border border-amber-500/30">
               API Key Needed
@@ -147,114 +210,126 @@
             <div class="grid grid-cols-2 gap-2">
               <div>
                 <label for="geminiModelSelect" class="block text-[11px] text-slate-400 mb-1">Model</label>
-                <select id="geminiModelSelect" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                  <option value="gemini-3.5-flash-lite">⚡ Gemini 3.5 Flash-Lite (Ultra Fast)</option>
-                  <option value="gemini-3.8-flash" selected>🚀 Gemini 3.8 Flash (Balanced)</option>
-                  <option value="gemini-4-argon">🧠 Gemini 4 Argon (Deep Reasoning)</option>
-                  <option value="gemini-3.1-pro-preview">🔬 Gemini 3.1 Pro</option>
+                <select id="geminiModelSelect" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-slate-100 focus:outline-none">
+                  <option value="gemini-3.5-flash-lite">⚡ 3.5 Flash-Lite (Fast)</option>
+                  <option value="gemini-3.8-flash" selected>🚀 3.8 Flash</option>
+                  <option value="gemini-4-argon">🧠 4 Argon</option>
+                  <option value="gemini-3.1-pro-preview">🔬 3.1 Pro</option>
                 </select>
               </div>
               <div>
-                <label for="geminiLangSelect" class="block text-[11px] text-slate-400 mb-1">Tutor Language</label>
-                <select id="geminiLangSelect" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                <label for="geminiLangSelect" class="block text-[11px] text-slate-400 mb-1">Language</label>
+                <select id="geminiLangSelect" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-slate-100 focus:outline-none">
                   <option value="English" selected>English</option>
                   <option value="Traditional Chinese (繁體中文)">繁體中文</option>
-                  <option value="Bilingual (English & Traditional Chinese 繁體中文)">English + 繁體中文</option>
+                  <option value="Bilingual (English & Traditional Chinese 繁體中文)">EN + 繁中</option>
                 </select>
               </div>
             </div>
-
-            <!-- AI Mode Selector (Math Tutor vs Object ID) -->
-            <div>
-              <label for="aiModeSelect" class="block text-[11px] text-slate-400 mb-1">AI Mode when Photo Arrives</label>
-              <select id="aiModeSelect" class="w-full bg-indigo-950/60 border border-indigo-500/40 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-indigo-200 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                <option value="math_tutor" selected>🎓 Socratic Math Tutor (Guide Me Step-by-Step, Never Spoil Answer)</option>
-                <option value="object_id">🔍 Object Identifier (Tell Me What Object Is in Photo)</option>
-              </select>
-            </div>
           </div>
-        </div>
-
-        <!-- QR Code Card -->
-        <div class="glass-card rounded-2xl p-5 shadow-xl relative overflow-hidden">
-          <div class="flex items-center justify-between mb-2">
-            <h2 class="text-xs font-bold uppercase tracking-wider text-indigo-300 flex items-center gap-1.5">
-              <span>📱</span> Scan with Phone to Snap Question
-            </h2>
-            <button id="refreshRoomBtn" title="Generate new room QR code" class="text-[11px] text-slate-400 hover:text-white px-2 py-0.5 rounded-lg hover:bg-slate-800 transition">
-              🔄 New Code
-            </button>
-          </div>
-
-          <p class="text-xs text-slate-400 mb-3 leading-relaxed">
-            Scan once with your phone to snap your <strong>math problem</strong> (or a photo of your <strong>handwritten steps</strong> so the tutor can check your work!).
-          </p>
-
-          <!-- QR Canvas Wrapper -->
-          <div class="bg-white p-3.5 rounded-2xl shadow-inner mx-auto w-fit qr-box relative">
-            <div id="mainQrContainer" class="w-[176px] h-[176px] flex items-center justify-center text-slate-400 text-xs">
-              Generating QR...
-            </div>
-          </div>
-
-          <div class="mt-3 pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs">
-            <div class="text-slate-400">
-              Room ID: <span id="roomIdLabel" class="font-mono font-semibold text-slate-200">---</span>
-            </div>
-            <button id="copyUploadLinkBtn" class="text-indigo-400 hover:text-indigo-300 font-medium flex items-center gap-1 transition">
-              <span>🔗</span> Copy Link
-            </button>
-          </div>
-
-          <!-- Connected Indicator -->
-          <div id="connectedDevicesBanner" class="hidden mt-3 p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/25 text-emerald-300 text-xs flex items-center gap-2">
-            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-            <span class="font-semibold">Phone Connected! Snap a math problem anytime</span>
-          </div>
-
-          <!-- Incoming Transfer Progress Bar -->
-          <div id="pcReceiveProgressBox" class="hidden mt-3 p-2.5 rounded-xl bg-indigo-500/10 border border-indigo-500/25">
-            <div class="flex justify-between text-xs text-indigo-300 mb-1 font-medium">
-              <span>Receiving photo from phone...</span>
-              <span id="pcReceivePercentLabel">0%</span>
-            </div>
-            <div class="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
-              <div id="pcReceiveProgressBar" class="h-full bg-gradient-to-r from-indigo-500 to-purple-500 transition-all duration-150" style="width: 0%"></div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Upload from PC Card -->
-        <div class="glass-card rounded-2xl p-4 shadow-xl">
-          <label id="pcDropZone" for="pcFileInput" class="border-2 border-dashed border-slate-700 hover:border-indigo-500/70 bg-slate-900/50 hover:bg-indigo-500/5 transition rounded-xl p-4 flex flex-col items-center justify-center cursor-pointer text-center group">
-            <span class="text-xl mb-1">💻</span>
-            <span class="text-xs font-semibold text-slate-200 group-hover:text-indigo-300 transition">Or Drop / Paste (Ctrl+V) Math Image from PC</span>
-            <span class="text-[11px] text-slate-500 mt-0.5">You can crop to a single question before sending</span>
-            <input id="pcFileInput" type="file" accept="image/*" class="hidden" />
-          </label>
         </div>
 
       </section>
 
-      <!-- Right Column: Interactive Socratic Math Tutor Workspace (8 cols) -->
-      <section class="lg:col-span-8 flex flex-col h-[calc(100vh-6rem)] min-h-[600px]">
+      <!-- ================================================================= -->
+      <!-- RIGHT WORKSPACE A: P2P FILE & ZIP TRANSFER (NOTEBOOK ⇄ PC)        -->
+      <!-- ================================================================= -->
+      <section id="fileDropWorkspace" class="lg:col-span-8 flex flex-col space-y-5">
+        
+        <!-- Big Universal File Dropzone (.ZIP, .PDF, .DOCX, .XLSX, Any File!) -->
+        <div class="glass-card rounded-2xl p-6 shadow-2xl border border-indigo-500/30">
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+            <div>
+              <h2 class="text-base font-bold text-white flex items-center gap-2">
+                <span>📦</span> Send Any File or .ZIP Between Notebook &amp; PC
+              </h2>
+              <p class="text-xs text-slate-400 mt-0.5">
+                Drop any `.zip`, `.pdf`, `.xlsx`, `.docx`, image, or archive below to beam it directly to all devices in Room <span id="workspaceRoomBadge" class="font-mono font-bold text-indigo-300">---</span>
+              </p>
+            </div>
+            <label class="flex items-center space-x-2 text-xs text-slate-300 cursor-pointer select-none bg-slate-900/90 px-3 py-1.5 rounded-xl border border-slate-800">
+              <input id="autoDownloadToggle" type="checkbox" checked class="rounded text-indigo-500 focus:ring-0" />
+              <span>⚡ Auto-Save incoming files to Downloads</span>
+            </label>
+          </div>
+
+          <label id="anyFileDropZone" for="anyFileInput" class="border-2 border-dashed border-indigo-500/50 hover:border-indigo-400 bg-slate-900/60 hover:bg-indigo-500/10 transition rounded-2xl p-8 flex flex-col items-center justify-center cursor-pointer text-center group">
+            <div class="w-16 h-16 rounded-2xl bg-indigo-500/15 group-hover:bg-indigo-500/25 border border-indigo-500/30 flex items-center justify-center text-3xl mb-3 transition shadow-inner">
+              📤
+            </div>
+            <span class="text-base font-bold text-white group-hover:text-indigo-300 transition">
+              Click or Drag &amp; Drop Any File (.ZIP, .PDF, Folders, Photos)
+            </span>
+            <span class="text-xs text-slate-400 mt-1">
+              Direct binary WebRTC streaming • Works both ways (Notebook → PC and PC → Notebook)
+            </span>
+            <input id="anyFileInput" type="file" multiple class="hidden" />
+          </label>
+
+          <!-- Live File Transfer Progress Box -->
+          <div id="fileTransferProgressBox" class="hidden mt-4 p-4 rounded-xl bg-indigo-950/60 border border-indigo-500/40 space-y-2">
+            <div class="flex items-center justify-between text-xs font-semibold">
+              <span id="fileTransferLabel" class="text-indigo-200 truncate max-w-[70%]">Transferring file...</span>
+              <span id="fileTransferStats" class="text-emerald-300 font-mono">0%</span>
+            </div>
+            <div class="w-full h-2.5 bg-slate-900 rounded-full overflow-hidden">
+              <div id="fileTransferBar" class="h-full bg-gradient-to-r from-indigo-500 via-purple-500 to-emerald-400 transition-all duration-100" style="width: 0%"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Received & Sent Files List -->
+        <div class="glass-card rounded-2xl p-6 flex-1 flex flex-col shadow-xl">
+          <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-800">
+            <div class="flex items-center gap-2">
+              <h3 class="text-sm font-bold text-white">Transferred Files in This Session</h3>
+              <span id="fileCountBadge" class="px-2 py-0.5 text-xs font-bold rounded-full bg-slate-800 text-indigo-400">0</span>
+            </div>
+            <button id="clearFilesListBtn" class="text-xs text-slate-400 hover:text-rose-400 transition">
+              Clear List
+            </button>
+          </div>
+
+          <div id="emptyFilesState" class="flex-1 flex flex-col items-center justify-center text-center py-12 text-slate-400">
+            <div class="text-3xl mb-2">📂</div>
+            <p class="text-xs max-w-sm leading-relaxed">
+              No files transferred yet.<br />
+              Make sure your Notebook and PC have the same <strong>Room ID</strong> on the left, then drop a `.zip` or any file above!
+            </p>
+          </div>
+
+          <div id="fileListContainer" class="hidden space-y-3"></div>
+        </div>
+
+      </section>
+
+      <!-- ================================================================= -->
+      <!-- RIGHT WORKSPACE B: SOCRATIC AI MATH TUTOR                         -->
+      <!-- ================================================================= -->
+      <section id="mathTutorWorkspace" class="hidden lg:col-span-8 flex flex-col h-[calc(100vh-6rem)] min-h-[600px]">
         <div class="glass-card rounded-2xl flex-1 flex flex-col shadow-2xl overflow-hidden border border-slate-800">
           
-          <!-- Tutor Top Bar / Internal Verification Drawer Toggle -->
+          <!-- Tutor Top Bar -->
           <div class="px-5 py-3.5 border-b border-slate-800/90 bg-slate-900/60 flex flex-wrap items-center justify-between gap-2">
             <div class="flex items-center gap-2.5">
               <span class="w-2.5 h-2.5 rounded-full bg-indigo-400"></span>
-              <h2 class="text-sm font-bold text-white">Guided Problem-Solving Session</h2>
-              <span class="text-[11px] text-slate-400 hidden sm:inline">• Live streaming response</span>
+              <h2 class="text-sm font-bold text-white">Guided Math Problem-Solving Session</h2>
+              <select id="aiModeSelect" class="ml-2 bg-indigo-950/70 border border-indigo-500/40 rounded-lg px-2 py-1 text-[11px] font-semibold text-indigo-200 focus:outline-none">
+                <option value="math_tutor" selected>🎓 Socratic Math Tutor</option>
+                <option value="object_id">🔍 Object Identifier</option>
+              </select>
             </div>
             <div class="flex items-center gap-2">
               <button id="toggleSolverNotesBtn" class="hidden px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-[11px] text-amber-300 border border-amber-500/30 font-medium transition">
                 🧠 View AI's Hidden Scratchpad
               </button>
+              <button id="newProblemBtn" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-[11px] text-slate-200 border border-slate-700 font-medium transition">
+                🔄 New Problem
+              </button>
             </div>
           </div>
 
-          <!-- Hidden Solver Scratchpad (Computed asynchronously in background so it NEVER slows down the response!) -->
+          <!-- Hidden Solver Scratchpad -->
           <div id="solverScratchpadDrawer" class="hidden bg-amber-950/30 border-b border-amber-500/30 p-4 text-xs text-amber-100/90 max-h-48 overflow-y-auto space-y-1">
             <div class="font-bold text-amber-300 uppercase tracking-wider text-[10px]">🔒 AI Internal Math Verification (Spoiler Warning!)</div>
             <div id="solverScratchpadContent" class="math-prose text-xs whitespace-pre-line"></div>
@@ -262,33 +337,22 @@
 
           <!-- Chat Messages Area -->
           <div id="tutorChatContainer" class="flex-1 overflow-y-auto p-5 space-y-5">
-            <!-- Welcome Empty State -->
             <div id="tutorWelcomeState" class="h-full flex flex-col items-center justify-center text-center py-12 px-4">
               <div class="w-16 h-16 rounded-2xl bg-indigo-500/15 border border-indigo-500/30 flex items-center justify-center text-3xl mb-4 shadow-inner">
                 📐
               </div>
-              <h3 class="text-base font-bold text-white mb-1.5">Ready to Guide You Through Any Math Problem!</h3>
-              <p class="text-xs text-slate-400 max-w-md leading-relaxed mb-5">
-                Scan the QR code on the left with your phone to snap a photo of a math question (or drop/paste a screenshot from your PC).
+              <h3 class="text-base font-bold text-white mb-1.5">Socratic AI Math Tutor</h3>
+              <p class="text-xs text-slate-400 max-w-md leading-relaxed mb-4">
+                Click the 📷 button below (or scan the QR code with your phone) to upload a math question. The AI will guide you step-by-step without spoiling the answer!
               </p>
-              <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-xl w-full text-left text-xs">
-                <div class="p-3.5 rounded-xl bg-slate-900/80 border border-slate-800">
-                  <div class="font-bold text-indigo-300 mb-1">1. Snap Question 📸</div>
-                  <p class="text-[11px] text-slate-400">Crop to the exact problem you want to solve.</p>
-                </div>
-                <div class="p-3.5 rounded-xl bg-slate-900/80 border border-slate-800">
-                  <div class="font-bold text-purple-300 mb-1">2. Instant Streaming Guide ⚡</div>
-                  <p class="text-[11px] text-slate-400">Streams guidance in ~1 second—asks you one small question at a time.</p>
-                </div>
-                <div class="p-3.5 rounded-xl bg-slate-900/80 border border-slate-800">
-                  <div class="font-bold text-emerald-300 mb-1">3. Snap Handwritten Work ✍️</div>
-                  <p class="text-[11px] text-slate-400">Stuck? Reply in chat or snap a photo of your handwritten steps for feedback!</p>
-                </div>
-              </div>
+              <label for="pcMathFileInput" class="cursor-pointer px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-lg shadow-indigo-600/25 transition">
+                📷 Upload Math Question Image
+              </label>
+              <input id="pcMathFileInput" type="file" accept="image/*" class="hidden" />
             </div>
           </div>
 
-          <!-- Quick Action Pills (Shown when a tutoring session is active) -->
+          <!-- Quick Action Pills -->
           <div id="quickPromptsBar" class="hidden px-4 py-2 bg-slate-900/80 border-t border-slate-800/80 flex flex-wrap items-center gap-2">
             <span class="text-[11px] text-slate-400 mr-1">Need help?</span>
             <button data-quick="Can you give me a smaller hint for this step without giving away the answer?" class="px-2.5 py-1 rounded-full bg-indigo-500/15 hover:bg-indigo-500/25 text-indigo-300 border border-indigo-500/30 text-[11px] font-medium transition">
@@ -304,7 +368,7 @@
 
           <!-- Chat Input Bar -->
           <div class="p-3.5 bg-slate-900/90 border-t border-slate-800 flex items-end gap-2.5">
-            <label for="pcFileInput" title="Upload math photo from PC" class="cursor-pointer p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 transition shrink-0">
+            <label for="pcMathFileInput" title="Upload math photo" class="cursor-pointer p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 transition shrink-0">
               📷
             </label>
             <textarea
@@ -329,17 +393,17 @@
   </div>
 
   <!-- ===================================================================== -->
-  <!-- 2. MOBILE TRANSMITTER VIEW (#remote=ROOM_ID)                          -->
+  <!-- 2. REMOTE SENDER VIEW (#remote=ROOM_ID — For Phone OR Notebook!)      -->
   <!-- ===================================================================== -->
   <div id="mobileUploadView" class="hidden min-h-screen flex flex-col bg-[#0b1120] p-4 sm:p-6">
-    <div class="max-w-md w-full mx-auto flex-1 flex flex-col space-y-5">
+    <div class="max-w-lg w-full mx-auto flex-1 flex flex-col space-y-5">
       <!-- Header -->
       <div class="glass-card rounded-2xl p-4 flex items-center justify-between">
         <div class="flex items-center gap-3">
-          <span class="text-2xl">🎓</span>
+          <span class="text-2xl">⚡</span>
           <div>
-            <h1 class="font-bold text-base text-white">Socratic Math Tutor</h1>
-            <p class="text-[11px] text-indigo-400">Snap math problem or handwritten work</p>
+            <h1 class="font-bold text-base text-white">Send to PC (Room <span id="remoteRoomLabel" class="font-mono text-indigo-400"></span>)</h1>
+            <p class="text-[11px] text-slate-400">Send any .ZIP, File, or Photo directly to the connected PC</p>
           </div>
         </div>
         <div id="mobileConnBadge" class="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-amber-500/15 text-amber-300 border border-amber-500/30">
@@ -350,31 +414,40 @@
       <!-- Main Upload Card -->
       <div class="glass-card rounded-2xl p-6 flex-1 flex flex-col justify-between space-y-6">
         <div class="space-y-4">
-          <div class="text-center">
-            <h2 class="text-lg font-bold text-white">Send Math Photo to PC Tutor</h2>
-            <p class="text-xs text-slate-400 mt-1">Snap a textbook question OR snap your handwritten calculation so the tutor can check your step!</p>
+
+          <!-- Action 1: Send Any File / .ZIP (Great for Notebook -> PC or Phone Files -> PC!) -->
+          <div class="space-y-2">
+            <div class="text-xs font-bold uppercase tracking-wider text-indigo-300">📦 Option 1: Send Any File (.ZIP, .PDF, .DOCX, etc.)</div>
+            <label for="remoteAnyFileInput" class="cursor-pointer py-6 px-4 rounded-2xl border-2 border-dashed border-indigo-500/60 hover:border-indigo-400 bg-indigo-950/30 hover:bg-indigo-900/30 text-white font-bold text-center flex flex-col items-center justify-center gap-2 active:scale-[0.99] transition">
+              <span class="text-3xl">📁</span>
+              <span class="text-base">Select or Drop Any File / .ZIP to Send to PC</span>
+              <span class="text-[11px] text-indigo-200 font-normal">Transfers original file bytes directly to your PC</span>
+              <input id="remoteAnyFileInput" type="file" multiple class="hidden" />
+            </label>
           </div>
 
-          <!-- Two Big Action Buttons: Camera & Gallery -->
-          <div class="grid grid-cols-1 gap-3.5 pt-2">
-            <label for="mobileCameraInput" class="cursor-pointer py-5 px-4 rounded-2xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold text-center shadow-lg shadow-indigo-600/30 flex flex-col items-center justify-center gap-2 active:scale-[0.98] transition">
-              <span class="text-3xl">📷</span>
-              <span class="text-base">Take Photo of Math / Work</span>
-              <span class="text-[11px] text-indigo-100 font-normal">Opens your phone camera directly</span>
-              <input id="mobileCameraInput" type="file" accept="image/*" capture="environment" class="hidden" />
-            </label>
+          <!-- Action 2: Snap Math Question / Camera Photo -->
+          <div class="space-y-2 pt-2 border-t border-slate-800">
+            <div class="text-xs font-bold uppercase tracking-wider text-purple-300">📷 Option 2: Snap Photo for AI Math Tutor</div>
+            <div class="grid grid-cols-2 gap-3">
+              <label for="mobileCameraInput" class="cursor-pointer py-4 px-3 rounded-2xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold text-center flex flex-col items-center justify-center gap-1 active:scale-[0.98] transition">
+                <span class="text-2xl">📷</span>
+                <span class="text-xs">Camera Photo</span>
+                <input id="mobileCameraInput" type="file" accept="image/*" capture="environment" class="hidden" />
+              </label>
 
-            <label for="mobileGalleryInput" class="cursor-pointer py-4 px-4 rounded-2xl bg-slate-800/90 hover:bg-slate-800 border border-slate-700 text-slate-100 font-semibold text-center flex flex-col items-center justify-center gap-1.5 active:scale-[0.98] transition">
-              <span class="text-2xl">🖼️</span>
-              <span class="text-sm">Choose from Photo Library</span>
-              <input id="mobileGalleryInput" type="file" accept="image/*" class="hidden" />
-            </label>
+              <label for="mobileGalleryInput" class="cursor-pointer py-4 px-3 rounded-2xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-100 font-semibold text-center flex flex-col items-center justify-center gap-1 active:scale-[0.98] transition">
+                <span class="text-2xl">🖼️</span>
+                <span class="text-xs">Photo Album</span>
+                <input id="mobileGalleryInput" type="file" accept="image/*" class="hidden" />
+              </label>
+            </div>
           </div>
 
           <!-- Transfer Progress & Status -->
           <div id="mobileProgressBox" class="hidden p-4 rounded-xl bg-indigo-500/10 border border-indigo-500/30 space-y-2">
             <div class="flex justify-between text-xs font-semibold text-indigo-300">
-              <span id="mobileProgressText">Sending photo...</span>
+              <span id="mobileProgressText">Sending...</span>
               <span id="mobileProgressPercent">0%</span>
             </div>
             <div class="w-full h-2.5 bg-slate-900 rounded-full overflow-hidden">
@@ -385,15 +458,15 @@
           <!-- Live Tutor Feedback on Mobile -->
           <div id="mobileAiResultBox" class="hidden p-4 rounded-2xl bg-indigo-950/60 border border-indigo-500/40 space-y-2">
             <div class="text-[11px] font-bold uppercase tracking-wider text-indigo-300 flex items-center gap-1.5">
-              <span>🎓</span> Tutor Guidance (Also shown on PC)
+              <span>🎓</span> Tutor Guidance
             </div>
             <div id="mobileAiObjectDesc" class="text-xs text-slate-200 leading-relaxed whitespace-pre-line"></div>
           </div>
         </div>
 
         <div class="pt-4 border-t border-slate-800/80 text-center">
-          <a href="#" id="exitMobileModeLink" class="text-xs text-slate-400 hover:text-slate-200 underline">
-            Switch to Desktop Tutor View
+          <a href="#" id="exitMobileModeLink" class="text-xs text-indigo-400 hover:text-indigo-300 font-semibold underline">
+            Switch to Full Two-Way Notebook ⇄ PC Hub View
           </a>
         </div>
       </div>
@@ -408,7 +481,7 @@
       <div class="flex items-center justify-between">
         <div>
           <h3 class="font-bold text-base text-white flex items-center gap-2">
-            <span>✂️</span> Crop to the Math Question (or Your Handwritten Work)
+            <span>✂️</span> Crop to the Math Question
           </h3>
           <p class="text-[11px] text-slate-400">Crop tightly around the single question you want the tutor to guide you through</p>
         </div>
@@ -444,7 +517,7 @@
   </div>
 
   <!-- ===================================================================== -->
-  <!-- APPLICATION LOGIC (Turbo Streaming + Non-Blocking Verification)       -->
+  <!-- APPLICATION LOGIC (Universal Binary File Transfer + Socratic Tutor)   -->
   <!-- ===================================================================== -->
   <script>
     /*************************************************************************
@@ -459,8 +532,6 @@
     }
     let geminiLang = localStorage.getItem('gemini_lang') || 'English';
     let aiMode = localStorage.getItem('qr_ai_mode') || 'math_tutor';
-
-    // Cache whichever endpoint host worked first so we NEVER waste time retrying failed endpoints!
     let cachedEndpointBase = localStorage.getItem('gemini_endpoint_base') || '';
 
     let chatHistory = [];
@@ -490,8 +561,9 @@
     ];
 
     const MQTT_BROKER_URL = 'wss://broker.emqx.io:8084/mqtt';
+    const myPeerInstanceId = generateShortId(6);
 
-    function generateShortId(len = 8) {
+    function generateShortId(len = 6) {
       const chars = 'abcdefghjkmnpqrstuvwxyz23456789';
       let out = '';
       const arr = new Uint8Array(len);
@@ -500,12 +572,295 @@
       return out;
     }
 
-    let activeRoomId = localStorage.getItem('qr_photo_drop_room_id') || generateShortId(8);
+    function formatBytes(bytes) {
+      if (bytes === 0) return '0 B';
+      const k = 1024;
+      const sizes = ['B', 'KB', 'MB', 'GB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    let activeRoomId = localStorage.getItem('qr_photo_drop_room_id') || generateShortId(6);
     localStorage.setItem('qr_photo_drop_room_id', activeRoomId);
     const receivedTransferIds = new Set();
+    const transferredFilesList = []; // { id, name, size, mime, blobUrl, direction, timestamp }
 
     /*************************************************************************
-     * 2. Markdown + KaTeX Math Rendering Helper
+     * 2. Workspace Tab Switching (File Drop vs Math Tutor)
+     *************************************************************************/
+    function switchWorkspaceTab(tabName) {
+      const fileWs = document.getElementById('fileDropWorkspace');
+      const mathWs = document.getElementById('mathTutorWorkspace');
+      const fileBtn = document.getElementById('tabFileDropBtn');
+      const mathBtn = document.getElementById('tabMathTutorBtn');
+
+      if (tabName === 'math') {
+        fileWs.classList.add('hidden');
+        mathWs.classList.remove('hidden');
+        mathBtn.className = 'px-3.5 py-1.5 rounded-lg text-xs font-bold bg-indigo-600 text-white shadow transition flex items-center gap-1.5';
+        fileBtn.className = 'px-3.5 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition flex items-center gap-1.5';
+      } else {
+        mathWs.classList.add('hidden');
+        fileWs.classList.remove('hidden');
+        fileBtn.className = 'px-3.5 py-1.5 rounded-lg text-xs font-bold bg-indigo-600 text-white shadow transition flex items-center gap-1.5';
+        mathBtn.className = 'px-3.5 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition flex items-center gap-1.5';
+      }
+    }
+
+    /*************************************************************************
+     * 3. Universal File & ZIP Transfer Engine (Notebook ⇄ PC ⇄ Phone)
+     *************************************************************************/
+    let pcPeer = null;
+    let pcMqtt = null;
+    const activeWebRtcPeers = new Map(); // peerId -> DataConnection
+    const incomingPhotos = new Map();
+    const incomingFiles = new Map(); // fileId -> { name, size, mime, total, receivedCount, chunks: [] }
+
+    function arrayBufferToBase64(buffer) {
+      let binary = '';
+      const bytes = new Uint8Array(buffer);
+      const len = bytes.byteLength;
+      for (let i = 0; i < len; i++) {
+        binary += String.fromCharCode(bytes[i]);
+      }
+      return window.btoa(binary);
+    }
+
+    function base64ToUint8Array(base64) {
+      const binaryString = window.atob(base64);
+      const len = binaryString.length;
+      const bytes = new Uint8Array(len);
+      for (let i = 0; i < len; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+      }
+      return bytes;
+    }
+
+    async function sendUniversalFileToRoom(file, roomId, progressCallback = null) {
+      const fileId = generateShortId(10);
+      const CHUNK_SIZE = 64 * 1024; // 64KB binary chunks
+      const totalChunks = Math.max(1, Math.ceil(file.size / CHUNK_SIZE));
+      const roomTopic = `qrdrop/${roomId}/room_bus`;
+
+      // Show progress bar on Desktop if in desktop view
+      const pBox = document.getElementById('fileTransferProgressBox');
+      const pLabel = document.getElementById('fileTransferLabel');
+      const pStats = document.getElementById('fileTransferStats');
+      const pBar = document.getElementById('fileTransferBar');
+      if (pBox) {
+        pBox.classList.remove('hidden');
+        pLabel.textContent = `📤 Sending ${file.name} (${formatBytes(file.size)})...`;
+      }
+
+      // Check if we have an open direct WebRTC connection (fastest for large .ZIP files!)
+      const openRtcConns = Array.from(activeWebRtcPeers.values()).filter((c) => c && c.open);
+
+      for (let index = 0; index < totalChunks; index++) {
+        const start = index * CHUNK_SIZE;
+        const end = Math.min(file.size, start + CHUNK_SIZE);
+        const sliceBuffer = await file.slice(start, end).arrayBuffer();
+
+        if (openRtcConns.length > 0) {
+          // Send raw binary ArrayBuffer directly over WebRTC DataChannel!
+          const rtcPacket = {
+            type: 'file_chunk_bin',
+            senderId: myPeerInstanceId,
+            fileId,
+            name: file.name,
+            size: file.size,
+            mime: file.type || 'application/octet-stream',
+            index,
+            total: totalChunks,
+            buffer: sliceBuffer
+          };
+          for (const conn of openRtcConns) {
+            conn.send(rtcPacket);
+          }
+          // Backpressure pacing for multi-MB ZIP files
+          await new Promise((r) => setTimeout(r, 6));
+        } else {
+          // Fallback: Send over MQTT WebSocket Bus (works through any hotspot or firewall)
+          const b64Chunk = arrayBufferToBase64(sliceBuffer);
+          const mqttPacket = {
+            type: 'file_chunk_b64',
+            senderId: myPeerInstanceId,
+            fileId,
+            name: file.name,
+            size: file.size,
+            mime: file.type || 'application/octet-stream',
+            index,
+            total: totalChunks,
+            b64: b64Chunk
+          };
+          if (pcMqtt && pcMqtt.connected) {
+            pcMqtt.publish(roomTopic, JSON.stringify(mqttPacket), { qos: 0 });
+          }
+          if (mobileMqttClient && mobileMqttClient.connected) {
+            mobileMqttClient.publish(roomTopic, JSON.stringify(mqttPacket), { qos: 0 });
+          }
+          await new Promise((r) => setTimeout(r, 22));
+        }
+
+        const pct = Math.round(((index + 1) / totalChunks) * 100);
+        if (pBox) {
+          pStats.textContent = `${pct}%`;
+          pBar.style.width = `${pct}%`;
+        }
+        if (progressCallback) progressCallback(pct);
+      }
+
+      if (pBox) {
+        pLabel.textContent = `✓ Sent ${file.name}!`;
+        setTimeout(() => pBox.classList.add('hidden'), 1500);
+      }
+
+      // Record in local sent list
+      const localUrl = URL.createObjectURL(file);
+      addFileToSessionList({
+        id: fileId,
+        name: file.name,
+        size: file.size,
+        mime: file.type || 'application/octet-stream',
+        blobUrl: localUrl,
+        direction: '📤 Sent',
+        timestamp: Date.now()
+      });
+    }
+
+    function handleIncomingFileChunk(msg) {
+      if (!msg || msg.senderId === myPeerInstanceId) return;
+      const { fileId, name, size, mime, index, total } = msg;
+      if (receivedTransferIds.has(fileId)) return;
+
+      showPeerConnectedBanner('💻 Peer Connected • Receiving file...');
+
+      let entry = incomingFiles.get(fileId);
+      if (!entry) {
+        entry = {
+          name: name || `file-${Date.now()}`,
+          size: size || 0,
+          mime: mime || 'application/octet-stream',
+          total,
+          receivedCount: 0,
+          chunks: new Array(total)
+        };
+        incomingFiles.set(fileId, entry);
+      }
+
+      if (entry.chunks[index] === undefined) {
+        if (msg.type === 'file_chunk_bin' && msg.buffer) {
+          entry.chunks[index] = new Uint8Array(msg.buffer);
+        } else if (msg.type === 'file_chunk_b64' && msg.b64) {
+          entry.chunks[index] = base64ToUint8Array(msg.b64);
+        }
+        entry.receivedCount++;
+      }
+
+      const pct = Math.round((entry.receivedCount / entry.total) * 100);
+      const pBox = document.getElementById('fileTransferProgressBox');
+      if (pBox) {
+        pBox.classList.remove('hidden');
+        document.getElementById('fileTransferLabel').textContent = `📥 Receiving ${entry.name} (${formatBytes(entry.size)})...`;
+        document.getElementById('fileTransferStats').textContent = `${pct}%`;
+        document.getElementById('fileTransferBar').style.width = `${pct}%`;
+      }
+
+      if (entry.receivedCount === entry.total) {
+        receivedTransferIds.add(fileId);
+        incomingFiles.delete(fileId);
+        if (pBox) {
+          document.getElementById('fileTransferLabel').textContent = `✓ Received ${entry.name}!`;
+          setTimeout(() => pBox.classList.add('hidden'), 1500);
+        }
+
+        const blob = new Blob(entry.chunks, { type: entry.mime });
+        const blobUrl = URL.createObjectURL(blob);
+
+        addFileToSessionList({
+          id: fileId,
+          name: entry.name,
+          size: entry.size || blob.size,
+          mime: entry.mime,
+          blobUrl,
+          direction: '📥 Received',
+          timestamp: Date.now()
+        });
+
+        // Switch to File Drop tab so user immediately sees their received file
+        switchWorkspaceTab('files');
+
+        // Auto-Download to PC Downloads folder if enabled!
+        const autoDl = document.getElementById('autoDownloadToggle');
+        if (autoDl && autoDl.checked) {
+          const a = document.createElement('a');
+          a.href = blobUrl;
+          a.download = entry.name;
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+        }
+      }
+    }
+
+    function addFileToSessionList(fileItem) {
+      transferredFilesList.unshift(fileItem);
+      renderFilesList();
+    }
+
+    function renderFilesList() {
+      const countBadge = document.getElementById('fileCountBadge');
+      const emptyState = document.getElementById('emptyFilesState');
+      const listContainer = document.getElementById('fileListContainer');
+
+      countBadge.textContent = transferredFilesList.length;
+      if (transferredFilesList.length === 0) {
+        emptyState.classList.remove('hidden');
+        listContainer.classList.add('hidden');
+        return;
+      }
+
+      emptyState.classList.add('hidden');
+      listContainer.classList.remove('hidden');
+      listContainer.innerHTML = '';
+
+      transferredFilesList.forEach((f) => {
+        const isZip = f.name.toLowerCase().endsWith('.zip') || f.name.toLowerCase().endsWith('.rar') || f.name.toLowerCase().endsWith('.7z');
+        const isImg = f.mime.startsWith('image/');
+        const icon = isZip ? '🗜️' : isImg ? '🖼️' : '📄';
+        const timeStr = new Date(f.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+
+        const row = document.createElement('div');
+        row.className = 'p-3.5 rounded-xl bg-slate-900/90 border border-slate-800 hover:border-indigo-500/40 flex flex-wrap items-center justify-between gap-3 transition';
+        row.innerHTML = `
+          <div class="flex items-center gap-3 min-w-0">
+            <div class="w-10 h-10 rounded-xl bg-slate-800 flex items-center justify-center text-xl shrink-0">
+              ${icon}
+            </div>
+            <div class="min-w-0">
+              <div class="flex items-center gap-2">
+                <span class="text-sm font-bold text-white truncate max-w-[240px] sm:max-w-md" title="${f.name}">${f.name}</span>
+                <span class="px-2 py-0.5 rounded text-[10px] font-semibold ${f.direction.includes('Received') ? 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30' : 'bg-indigo-500/15 text-indigo-300 border border-indigo-500/30'}">
+                  ${f.direction}
+                </span>
+              </div>
+              <div class="text-[11px] text-slate-400 mt-0.5">
+                ${formatBytes(f.size)} • ${timeStr}
+              </div>
+            </div>
+          </div>
+          <div class="flex items-center gap-2 shrink-0">
+            <a href="${f.blobUrl}" download="${f.name}" class="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-lg shadow-emerald-600/20 flex items-center gap-1.5 transition">
+              <span>💾</span>
+              <span>Save File</span>
+            </a>
+          </div>
+        `;
+        listContainer.appendChild(row);
+      });
+    }
+
+    /*************************************************************************
+     * 4. Markdown + KaTeX & Turbo Streaming Gemini API
      *************************************************************************/
     function renderMathAndMarkdown(element, markdownText) {
       if (!element) return;
@@ -533,9 +888,6 @@
       }
     }
 
-    /*************************************************************************
-     * 3. Ultra-Fast Streaming Gemini API Helper (:streamGenerateContent)
-     *************************************************************************/
     function getOrderedEndpointBases() {
       const bases = [
         'https://generativelanguage.googleapis.com/v1beta/models',
@@ -550,7 +902,7 @@
     async function streamGeminiAPI(contents, systemInstruction, temperature = 0.25, onStreamUpdate = null) {
       if (!geminiApiKey || geminiApiKey.length < 15) {
         document.getElementById('geminiApiKeyInput').focus();
-        throw new Error('Please paste your Gemini API Key in the top-left settings box first.');
+        throw new Error('Please paste your Gemini API Key in the left sidebar first.');
       }
 
       const candidateModels = [geminiModel, 'gemini-3.8-flash', 'gemini-3.5-flash-lite'].filter((v, i, a) => a.indexOf(v) === i);
@@ -581,7 +933,6 @@
               continue;
             }
 
-            // Remember this working endpoint base so future requests have ZERO retry delay!
             if (cachedEndpointBase !== base) {
               cachedEndpointBase = base;
               localStorage.setItem('gemini_endpoint_base', base);
@@ -627,13 +978,11 @@
       throw lastErr || new Error('Failed to reach Gemini API');
     }
 
-    /*************************************************************************
-     * 4. Turbo Socratic Math Tutor Engine (Single-Pass Streaming + Async Scratchpad)
-     *************************************************************************/
     async function runSocraticTutorTurn(userText, attachedImageUrl = null) {
       if (isAiThinking) return;
       isAiThinking = true;
 
+      switchWorkspaceTab('math');
       const welcomeEl = document.getElementById('tutorWelcomeState');
       if (welcomeEl) welcomeEl.classList.add('hidden');
       document.getElementById('quickPromptsBar').classList.remove('hidden');
@@ -646,7 +995,7 @@
         imageDataUrl: attachedImageUrl
       });
 
-      const thinkingBubbleContent = appendChatBubble('model', '⚡ *Reading & streaming your step-by-step guidance...*');
+      const thinkingBubbleContent = appendChatBubble('model', '⚡ *Streaming your step-by-step guidance...*');
       const chatContainer = document.getElementById('tutorChatContainer');
 
       try {
@@ -675,22 +1024,19 @@
           return;
         }
 
-        // Start Socratic Tutor IMMEDIATELY (Zero waiting for a prior call!)
         const socraticSystemPrompt = `You are a warm, encouraging, Socratic Math Tutor (蘇格拉底式數學引導家教).
 Language to use: ${geminiLang}.
 
-STRICT SOCRATIC RULES (CRITICAL — MUST FOLLOW WITHOUT EXCEPTION):
+STRICT SOCRATIC RULES:
 1. NEVER give the student the final answer or dump the full solution all at once!
 2. Break the problem into small, manageable steps.
 3. On the first turn when a math problem is uploaded:
-   - Briefly state what the problem is asking and list the known information clearly (using $...$ LaTeX for inline math and $$...$$ for display equations).
+   - Briefly state what the problem is asking and list the known information clearly (using $...$ LaTeX).
    - Point out the key concept or formula needed for Step 1.
    - Ask the student ONE specific, small guiding question to help them figure out Step 1 on their own.
-4. When the student replies (by text or by uploading a photo of their handwritten work):
-   - Carefully verify their math! Praise what they did right. If there is a mistake, gently point out where the slip-up happened and give a small hint so they can fix it.
-   - Once they get the current step right, confirm that intermediate result and ask ONE guiding question for the NEXT step.
-   - Only confirm the final answer AFTER the student reaches the final step themselves.
-5. Keep each response concise, friendly, and fast to read. Always ask ONLY ONE question at the end of your turn.
+4. When the student replies:
+   - Praise what they did right or gently help them fix any mistake.
+   - Once they get the current step right, ask ONE guiding question for the NEXT step.
 ${solverVerificationNotes ? `\n--- REFERENCE SOLUTION NOTES (DO NOT REVEAL DIRECTLY!) ---\n${solverVerificationNotes}\n---` : ''}`;
 
         const geminiContents = chatHistory.map((turn) => {
@@ -701,10 +1047,7 @@ ${solverVerificationNotes ? `\n--- REFERENCE SOLUTION NOTES (DO NOT REVEAL DIREC
             const mime = turn.imageDataUrl.match(/^data:(image\/[a-zA-Z0-9+.-]+);base64,/)?.[1] || 'image/jpeg';
             parts.push({ inline_data: { mime_type: mime, data: b64 } });
           }
-          return {
-            role: turn.role === 'model' ? 'model' : 'user',
-            parts
-          };
+          return { role: turn.role === 'model' ? 'model' : 'user', parts };
         });
 
         let lastRenderTime = 0;
@@ -726,12 +1069,10 @@ ${solverVerificationNotes ? `\n--- REFERENCE SOLUTION NOTES (DO NOT REVEAL DIREC
         chatHistory.push({ role: 'model', text: tutorReply });
         broadcastTutorReplyToMobile(tutorReply);
 
-        // Run background verification scratchpad asynchronously AFTER streaming starts/finishes so it NEVER delays the user!
         if (attachedImageUrl && !solverVerificationNotes) {
           generateBackgroundSolverNotes(attachedImageUrl);
         }
       } catch (err) {
-        console.error('Socratic Tutor Error:', err);
         thinkingBubbleContent.innerHTML = `<span class="text-rose-400 font-semibold">⚠️ ${err.message}</span>`;
       } finally {
         isAiThinking = false;
@@ -747,7 +1088,7 @@ ${solverVerificationNotes ? `\n--- REFERENCE SOLUTION NOTES (DO NOT REVEAL DIREC
           [{
             role: 'user',
             parts: [
-              { text: `Solve this math problem concisely step-by-step in ${geminiLang} using $...$ LaTeX so the tutor has a verified reference answer.` },
+              { text: `Solve this math problem concisely step-by-step in ${geminiLang} using $...$ LaTeX.` },
               { inline_data: { mime_type: mimeType, data: base64Data } }
             ]
           }],
@@ -755,8 +1096,7 @@ ${solverVerificationNotes ? `\n--- REFERENCE SOLUTION NOTES (DO NOT REVEAL DIREC
           0.1
         );
         solverVerificationNotes = notes;
-        const toggleBtn = document.getElementById('toggleSolverNotesBtn');
-        toggleBtn.classList.remove('hidden');
+        document.getElementById('toggleSolverNotesBtn').classList.remove('hidden');
         renderMathAndMarkdown(document.getElementById('solverScratchpadContent'), solverVerificationNotes);
       } catch (_) {}
     }
@@ -785,11 +1125,7 @@ ${solverVerificationNotes ? `\n--- REFERENCE SOLUTION NOTES (DO NOT REVEAL DIREC
         return textDiv;
       } else {
         wrapper.className = 'flex justify-start items-start gap-3';
-        wrapper.innerHTML = `
-          <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-sm shrink-0 mt-0.5 shadow">
-            🎓
-          </div>
-        `;
+        wrapper.innerHTML = `<div class="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-sm shrink-0 mt-0.5 shadow">🎓</div>`;
         const bubble = document.createElement('div');
         bubble.className = 'max-w-[85%] rounded-2xl rounded-tl-sm bg-slate-900/95 border border-slate-700/80 text-slate-100 p-4 shadow-xl text-sm math-prose';
         renderMathAndMarkdown(bubble, markdownText);
@@ -802,17 +1138,17 @@ ${solverVerificationNotes ? `\n--- REFERENCE SOLUTION NOTES (DO NOT REVEAL DIREC
 
     function broadcastTutorReplyToMobile(replyText) {
       const cleanPreview = replyText.replace(/\$\$/g, '').replace(/\$/g, '');
-      const packet = { type: 'ai_result', details: cleanPreview };
+      const packet = { type: 'ai_result', senderId: myPeerInstanceId, details: cleanPreview };
       if (lastMobileReplyFn) {
         try { lastMobileReplyFn(packet); } catch (_) {}
       }
       if (pcMqtt && pcMqtt.connected) {
-        pcMqtt.publish(`qrdrop/${activeRoomId}/to_mobile`, JSON.stringify(packet), { qos: 0 });
+        pcMqtt.publish(`qrdrop/${activeRoomId}/room_bus`, JSON.stringify(packet), { qos: 0 });
       }
     }
 
     /*************************************************************************
-     * 5. Fast Image Compression & Cropper Flow (1200px crisp & lightweight)
+     * 5. Image Compression & Cropper Flow
      *************************************************************************/
     function compressImageFile(file, maxDimension = 1280, quality = 0.82) {
       return new Promise((resolve, reject) => {
@@ -851,49 +1187,254 @@ ${solverVerificationNotes ? `\n--- REFERENCE SOLUTION NOTES (DO NOT REVEAL DIREC
     }
 
     let activeCropper = null;
-
     function openCropModalWithImage(dataUrl) {
       const modal = document.getElementById('cropModal');
       const imgEl = document.getElementById('cropImageTarget');
       modal.classList.remove('hidden');
-
-      if (activeCropper) {
-        activeCropper.destroy();
-        activeCropper = null;
-      }
+      if (activeCropper) { activeCropper.destroy(); activeCropper = null; }
       imgEl.onload = () => {
         if (activeCropper) activeCropper.destroy();
-        activeCropper = new Cropper(imgEl, {
-          viewMode: 1,
-          autoCropArea: 0.92,
-          background: false,
-          responsive: true
-        });
+        activeCropper = new Cropper(imgEl, { viewMode: 1, autoCropArea: 0.92, background: false, responsive: true });
       };
       imgEl.src = dataUrl;
     }
 
     function closeCropModal() {
       document.getElementById('cropModal').classList.add('hidden');
-      if (activeCropper) {
-        activeCropper.destroy();
-        activeCropper = null;
+      if (activeCropper) { activeCropper.destroy(); activeCropper = null; }
+    }
+
+    /*************************************************************************
+     * 6. Room Networking (Notebook ⇄ PC ⇄ Phone Shared Room Bus)
+     *************************************************************************/
+    function showPeerConnectedBanner(label = '✓ Peer Device Connected! Ready to transfer files') {
+      const banner = document.getElementById('connectedDevicesBanner');
+      const text = document.getElementById('connectedDevicesText');
+      if (banner) banner.classList.remove('hidden');
+      if (text) text.textContent = label;
+      updatePcConnectionBadge('connected', '💻 Peer Connected!');
+    }
+
+    function updatePcConnectionBadge(state, text) {
+      const badge = document.getElementById('pcConnectionBadge');
+      if (!badge) return;
+      if (state === 'ready') {
+        badge.className = 'inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-300 border border-emerald-500/25';
+        badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-400 mr-2 animate-pulse"></span><span>${text}</span>`;
+      } else if (state === 'connected') {
+        badge.className = 'inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold bg-indigo-500/15 text-indigo-300 border border-indigo-500/30';
+        badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-indigo-400 mr-2 animate-ping"></span><span>${text}</span>`;
+      }
+    }
+
+    function renderMainRoomQr(roomId) {
+      const qrBox = document.getElementById('mainQrContainer');
+      qrBox.innerHTML = '';
+      const uploadUrl = `${window.location.origin}${window.location.pathname}#remote=${roomId}`;
+      new QRCode(qrBox, {
+        text: uploadUrl,
+        width: 160,
+        height: 160,
+        colorDark: '#0f172a',
+        colorLight: '#ffffff',
+        correctLevel: QRCode.CorrectLevel.M
+      });
+      document.getElementById('roomIdLabel').textContent = roomId;
+      document.getElementById('workspaceRoomBadge').textContent = roomId;
+    }
+
+    function bindWebRtcConn(conn) {
+      activeWebRtcPeers.set(conn.peer, conn);
+      conn.on('open', () => {
+        showPeerConnectedBanner('⚡ Direct High-Speed P2P Connected!');
+        conn.send({ type: 'hello', senderId: myPeerInstanceId, roomId: activeRoomId });
+      });
+      conn.on('data', (msg) => {
+        handleRoomBusMessage(msg, (reply) => conn.send(reply));
+      });
+      conn.on('close', () => {
+        activeWebRtcPeers.delete(conn.peer);
+      });
+    }
+
+    function setupRoomConnection(roomId, isJoiningExistingRoom = false) {
+      renderMainRoomQr(roomId);
+      if (pcPeer) { try { pcPeer.destroy(); } catch (_) {} }
+      if (pcMqtt) { try { pcMqtt.end(true); } catch (_) {} }
+      activeWebRtcPeers.clear();
+
+      // Engine A: PeerJS WebRTC
+      try {
+        // Host uses qrdrop-ROOM, Joiner connects to qrdrop-ROOM
+        const desiredPeerId = isJoiningExistingRoom ? `qrdrop-${roomId}-${myPeerInstanceId}` : `qrdrop-${roomId}`;
+        pcPeer = new Peer(desiredPeerId, { config: { iceServers: ICE_SERVERS } });
+
+        pcPeer.on('open', () => {
+          updatePcConnectionBadge('ready', `Room ${roomId} Ready`);
+          if (isJoiningExistingRoom) {
+            const conn = pcPeer.connect(`qrdrop-${roomId}`, { reliable: true });
+            bindWebRtcConn(conn);
+          }
+        });
+
+        pcPeer.on('connection', (conn) => {
+          bindWebRtcConn(conn);
+        });
+
+        // If qrdrop-ROOM is already taken (meaning our other PC/Notebook is already hosting this room!),
+        // automatically join that room as a peer and connect to qrdrop-ROOM!
+        pcPeer.on('error', (err) => {
+          if (err.type === 'unavailable-id' && !isJoiningExistingRoom) {
+            setupRoomConnection(roomId, true);
+          }
+        });
+      } catch (_) {}
+
+      // Engine B: Shared MQTT over WSS Room Bus (Always connects all Notebooks, PCs, and Phones in the same Room!)
+      try {
+        pcMqtt = mqtt.connect(MQTT_BROKER_URL, {
+          clientId: `qrdrop_node_${roomId}_${myPeerInstanceId}`,
+          clean: true,
+          reconnectPeriod: 2000
+        });
+        const roomTopic = `qrdrop/${roomId}/room_bus`;
+
+        pcMqtt.on('connect', () => {
+          updatePcConnectionBadge('ready', `Room ${roomId} Ready`);
+          pcMqtt.subscribe(roomTopic, { qos: 0 }, () => {
+            pcMqtt.publish(roomTopic, JSON.stringify({
+              type: 'hello',
+              senderId: myPeerInstanceId,
+              peerId: pcPeer?.id || null,
+              roomId
+            }), { qos: 0 });
+          });
+        });
+
+        pcMqtt.on('message', (topic, payload) => {
+          if (topic !== roomTopic) return;
+          try {
+            const msg = JSON.parse(payload.toString());
+            if (msg.senderId === myPeerInstanceId) return;
+            handleRoomBusMessage(msg, (reply) => {
+              pcMqtt.publish(roomTopic, JSON.stringify({ ...reply, senderId: myPeerInstanceId }), { qos: 0 });
+            });
+          } catch (_) {}
+        });
+      } catch (_) {}
+    }
+
+    function handleRoomBusMessage(msg, sendReply) {
+      if (!msg || !msg.type || msg.senderId === myPeerInstanceId) return;
+      lastMobileReplyFn = sendReply;
+
+      if (msg.type === 'hello') {
+        showPeerConnectedBanner('💻 Peer Connected in Room ' + activeRoomId);
+        sendReply({ type: 'hello_ack', senderId: myPeerInstanceId, roomId: activeRoomId });
+        // Also initiate WebRTC connection if peerId provided
+        if (msg.peerId && pcPeer && !activeWebRtcPeers.has(msg.peerId)) {
+          try {
+            const conn = pcPeer.connect(msg.peerId, { reliable: true });
+            bindWebRtcConn(conn);
+          } catch (_) {}
+        }
+        return;
+      }
+
+      if (msg.type === 'hello_ack') {
+        showPeerConnectedBanner('💻 Peer Connected in Room ' + activeRoomId);
+        return;
+      }
+
+      // Universal Binary / Base64 File Chunk (ZIP, PDF, etc.)
+      if (msg.type === 'file_chunk_bin' || msg.type === 'file_chunk_b64') {
+        handleIncomingFileChunk(msg);
+        return;
+      }
+
+      // Math / Camera Photo Chunk
+      if (msg.type === 'photo_chunk') {
+        showPeerConnectedBanner('📱 Receiving photo from peer...');
+        const { transferId, index, total, chunk } = msg;
+        if (receivedTransferIds.has(transferId)) return;
+
+        let entry = incomingPhotos.get(transferId);
+        if (!entry) {
+          entry = { total, receivedCount: 0, parts: new Array(total) };
+          incomingPhotos.set(transferId, entry);
+        }
+
+        if (entry.parts[index] === undefined) {
+          entry.parts[index] = chunk;
+          entry.receivedCount++;
+        }
+
+        if (entry.receivedCount === entry.total) {
+          receivedTransferIds.add(transferId);
+          incomingPhotos.delete(transferId);
+          const fullDataUrl = entry.parts.join('');
+          openCropModalWithImage(fullDataUrl);
+          sendReply({ type: 'transfer_ack', senderId: myPeerInstanceId, transferId });
+        }
       }
     }
 
     /*************************************************************************
-     * 6. Desktop Hub & Dual-Engine Tunnel (WebRTC + MQTT WSS)
+     * 7. UI Event Listeners (Desktop & Notebook Unified Hub)
      *************************************************************************/
-    let pcPeer = null;
-    let pcMqtt = null;
-    const incomingChunks = new Map();
-
     function initDesktopHub() {
-      initSettingsListeners();
-      setupRoomConnection(activeRoomId);
-    }
+      // Tab switching
+      document.getElementById('tabFileDropBtn').addEventListener('click', () => switchWorkspaceTab('files'));
+      document.getElementById('tabMathTutorBtn').addEventListener('click', () => switchWorkspaceTab('math'));
 
-    function initSettingsListeners() {
+      // Join Room by Code (For connecting Notebook <-> PC!)
+      const joinInput = document.getElementById('joinRoomInput');
+      const handleJoinRoom = () => {
+        const code = joinInput.value.trim().toLowerCase().replace(/[^a-z0-9-_]/g, '');
+        if (!code) return;
+        activeRoomId = code;
+        localStorage.setItem('qr_photo_drop_room_id', activeRoomId);
+        joinInput.value = '';
+        setupRoomConnection(activeRoomId, true);
+      };
+      document.getElementById('joinRoomBtn').addEventListener('click', handleJoinRoom);
+      joinInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') handleJoinRoom();
+      });
+
+      // Universal File Input & Drag-and-Drop (.ZIP, .PDF, etc.)
+      const handleSelectedFiles = async (fileList) => {
+        const files = Array.from(fileList || []);
+        for (const file of files) {
+          await sendUniversalFileToRoom(file, activeRoomId);
+        }
+      };
+
+      document.getElementById('anyFileInput').addEventListener('change', (e) => {
+        handleSelectedFiles(e.target.files);
+        e.target.value = '';
+      });
+
+      const fDropZone = document.getElementById('anyFileDropZone');
+      fDropZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        fDropZone.classList.add('border-indigo-400', 'bg-indigo-500/20');
+      });
+      fDropZone.addEventListener('dragleave', () => {
+        fDropZone.classList.remove('border-indigo-400', 'bg-indigo-500/20');
+      });
+      fDropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        fDropZone.classList.remove('border-indigo-400', 'bg-indigo-500/20');
+        handleSelectedFiles(e.dataTransfer.files);
+      });
+
+      document.getElementById('clearFilesListBtn').addEventListener('click', () => {
+        transferredFilesList.length = 0;
+        renderFilesList();
+      });
+
+      // Gemini Settings
       const keyInput = document.getElementById('geminiApiKeyInput');
       const modelSelect = document.getElementById('geminiModelSelect');
       const langSelect = document.getElementById('geminiLangSelect');
@@ -921,22 +1462,18 @@ ${solverVerificationNotes ? `\n--- REFERENCE SOLUTION NOTES (DO NOT REVEAL DIREC
         localStorage.setItem('gemini_api_key', geminiApiKey);
         updateBadge();
       });
-
       modelSelect.addEventListener('change', (e) => {
         geminiModel = e.target.value;
         localStorage.setItem('gemini_model', geminiModel);
       });
-
       langSelect.addEventListener('change', (e) => {
         geminiLang = e.target.value;
         localStorage.setItem('gemini_lang', geminiLang);
       });
-
       modeSelect.addEventListener('change', (e) => {
         aiMode = e.target.value;
         localStorage.setItem('qr_ai_mode', aiMode);
       });
-
       document.getElementById('toggleApiKeyBtn').addEventListener('click', () => {
         keyInput.type = keyInput.type === 'password' ? 'text' : 'password';
       });
@@ -950,7 +1487,6 @@ ${solverVerificationNotes ? `\n--- REFERENCE SOLUTION NOTES (DO NOT REVEAL DIREC
 
       document.getElementById('confirmCropAndSendBtn').addEventListener('click', () => {
         if (!activeCropper) return;
-        // 1150px max dimension keeps math text razor sharp while making upload 4x faster on mobile hotspots!
         const canvas = activeCropper.getCroppedCanvas({ maxWidth: 1150, maxHeight: 1150, imageSmoothingQuality: 'high' });
         const croppedDataUrl = canvas.toDataURL('image/jpeg', 0.82);
         closeCropModal();
@@ -960,7 +1496,7 @@ ${solverVerificationNotes ? `\n--- REFERENCE SOLUTION NOTES (DO NOT REVEAL DIREC
         runSocraticTutorTurn(promptMsg, croppedDataUrl);
       });
 
-      // Chat send & Enter key
+      // Math Tutor Chat Controls
       const chatInput = document.getElementById('chatInput');
       const handleSend = () => {
         const text = chatInput.value.trim();
@@ -968,7 +1504,6 @@ ${solverVerificationNotes ? `\n--- REFERENCE SOLUTION NOTES (DO NOT REVEAL DIREC
         chatInput.value = '';
         runSocraticTutorTurn(text, null);
       };
-
       document.getElementById('sendChatBtn').addEventListener('click', handleSend);
       chatInput.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' && !e.shiftKey) {
@@ -977,19 +1512,16 @@ ${solverVerificationNotes ? `\n--- REFERENCE SOLUTION NOTES (DO NOT REVEAL DIREC
         }
       });
 
-      // Quick prompt buttons
       document.getElementById('quickPromptsBar').addEventListener('click', (e) => {
         const btn = e.target.closest('[data-quick]');
         if (!btn) return;
         runSocraticTutorTurn(btn.getAttribute('data-quick'), null);
       });
 
-      // Toggle hidden AI solver verification notes
       document.getElementById('toggleSolverNotesBtn').addEventListener('click', () => {
         document.getElementById('solverScratchpadDrawer').classList.toggle('hidden');
       });
 
-      // Reset / New Problem button
       document.getElementById('newProblemBtn').addEventListener('click', () => {
         chatHistory = [];
         solverVerificationNotes = '';
@@ -1003,44 +1535,21 @@ ${solverVerificationNotes ? `\n--- REFERENCE SOLUTION NOTES (DO NOT REVEAL DIREC
         document.getElementById('tutorWelcomeState').classList.remove('hidden');
       });
 
-      // PC File Input, Drag-and-Drop, and Paste
-      const handlePcFile = async (file) => {
-        if (!file || !file.type.startsWith('image/')) return;
-        const compressed = await compressImageFile(file, 1280, 0.82);
-        openCropModalWithImage(compressed.dataUrl);
-      };
-
-      document.getElementById('pcFileInput').addEventListener('change', (e) => {
-        if (e.target.files?.[0]) handlePcFile(e.target.files[0]);
+      document.getElementById('pcMathFileInput').addEventListener('change', async (e) => {
+        const file = e.target.files?.[0];
+        if (file && file.type.startsWith('image/')) {
+          const compressed = await compressImageFile(file, 1280, 0.82);
+          openCropModalWithImage(compressed.dataUrl);
+        }
         e.target.value = '';
       });
 
-      const dropZone = document.getElementById('pcDropZone');
-      dropZone.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        dropZone.classList.add('border-indigo-500', 'bg-indigo-500/10');
-      });
-      dropZone.addEventListener('dragleave', () => {
-        dropZone.classList.remove('border-indigo-500', 'bg-indigo-500/10');
-      });
-      dropZone.addEventListener('drop', (e) => {
-        e.preventDefault();
-        dropZone.classList.remove('border-indigo-500', 'bg-indigo-500/10');
-        if (e.dataTransfer.files?.[0]) handlePcFile(e.dataTransfer.files[0]);
-      });
-
-      window.addEventListener('paste', (e) => {
-        if (e.clipboardData && e.clipboardData.files?.[0]) {
-          handlePcFile(e.clipboardData.files[0]);
-        }
-      });
-
-      // Room ID controls
+      // Room controls
       document.getElementById('refreshRoomBtn').addEventListener('click', () => {
-        activeRoomId = generateShortId(8);
+        activeRoomId = generateShortId(6);
         localStorage.setItem('qr_photo_drop_room_id', activeRoomId);
         document.getElementById('connectedDevicesBanner').classList.add('hidden');
-        setupRoomConnection(activeRoomId);
+        setupRoomConnection(activeRoomId, false);
       });
 
       document.getElementById('copyUploadLinkBtn').addEventListener('click', (e) => {
@@ -1048,195 +1557,96 @@ ${solverVerificationNotes ? `\n--- REFERENCE SOLUTION NOTES (DO NOT REVEAL DIREC
         navigator.clipboard.writeText(url);
         const btn = e.currentTarget;
         const orig = btn.innerHTML;
-        btn.innerHTML = '<span>✓</span> Copied!';
+        btn.innerHTML = '✓ Copied!';
         setTimeout(() => (btn.innerHTML = orig), 1800);
       });
-    }
 
-    function renderMainRoomQr(roomId) {
-      const qrBox = document.getElementById('mainQrContainer');
-      qrBox.innerHTML = '';
-      const uploadUrl = `${window.location.origin}${window.location.pathname}#remote=${roomId}`;
-      new QRCode(qrBox, {
-        text: uploadUrl,
-        width: 176,
-        height: 176,
-        colorDark: '#0f172a',
-        colorLight: '#ffffff',
-        correctLevel: QRCode.CorrectLevel.M
-      });
-      document.getElementById('roomIdLabel').textContent = roomId;
-    }
-
-    function updatePcConnectionBadge(state, text) {
-      const badge = document.getElementById('pcConnectionBadge');
-      if (state === 'ready') {
-        badge.className = 'inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-300 border border-emerald-500/25';
-        badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-400 mr-2 animate-pulse"></span><span>${text}</span>`;
-      } else if (state === 'connected') {
-        badge.className = 'inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold bg-indigo-500/15 text-indigo-300 border border-indigo-500/30';
-        badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-indigo-400 mr-2 animate-ping"></span><span>${text}</span>`;
-      }
-    }
-
-    function setupRoomConnection(roomId) {
-      renderMainRoomQr(roomId);
-      if (pcPeer) { try { pcPeer.destroy(); } catch (_) {} }
-      if (pcMqtt) { try { pcMqtt.end(true); } catch (_) {} }
-
-      let peerReady = false;
-      let mqttReady = false;
-      const checkReady = () => {
-        if (peerReady || mqttReady) updatePcConnectionBadge('ready', 'Ready • Scan QR to connect');
-      };
-
-      try {
-        pcPeer = new Peer(`qrdrop-${roomId}`, { config: { iceServers: ICE_SERVERS } });
-        pcPeer.on('open', () => { peerReady = true; checkReady(); });
-        pcPeer.on('connection', (conn) => {
-          conn.on('open', () => {
-            document.getElementById('connectedDevicesBanner').classList.remove('hidden');
-            updatePcConnectionBadge('connected', '📱 Phone Connected!');
-          });
-          conn.on('data', (msg) => handleIncomingHubMessage(msg, (reply) => conn.send(reply)));
-        });
-      } catch (_) {}
-
-      try {
-        pcMqtt = mqtt.connect(MQTT_BROKER_URL, {
-          clientId: `qrdrop_pc_${roomId}_${generateShortId(4)}`,
-          clean: true,
-          reconnectPeriod: 2000
-        });
-        const hubTopic = `qrdrop/${roomId}/to_pc`;
-        const replyTopic = `qrdrop/${roomId}/to_mobile`;
-
-        pcMqtt.on('connect', () => {
-          mqttReady = true;
-          checkReady();
-          pcMqtt.subscribe(hubTopic, { qos: 0 });
-        });
-
-        pcMqtt.on('message', (topic, payload) => {
-          if (topic !== hubTopic) return;
-          try {
-            const msg = JSON.parse(payload.toString());
-            handleIncomingHubMessage(msg, (reply) => {
-              pcMqtt.publish(replyTopic, JSON.stringify(reply), { qos: 0 });
-            });
-          } catch (_) {}
-        });
-      } catch (_) {}
-    }
-
-    function handleIncomingHubMessage(msg, sendReply) {
-      if (!msg || !msg.type) return;
-      lastMobileReplyFn = sendReply;
-
-      if (msg.type === 'hello') {
-        document.getElementById('connectedDevicesBanner').classList.remove('hidden');
-        updatePcConnectionBadge('connected', '📱 Phone Connected!');
-        sendReply({ type: 'hello_ack', roomId: activeRoomId });
-        return;
-      }
-
-      if (msg.type === 'photo_chunk') {
-        document.getElementById('connectedDevicesBanner').classList.remove('hidden');
-        updatePcConnectionBadge('connected', '📱 Phone Connected!');
-        const { transferId, index, total, chunk } = msg;
-        if (receivedTransferIds.has(transferId)) return;
-
-        let entry = incomingChunks.get(transferId);
-        if (!entry) {
-          entry = { total, receivedCount: 0, parts: new Array(total) };
-          incomingChunks.set(transferId, entry);
-        }
-
-        if (entry.parts[index] === undefined) {
-          entry.parts[index] = chunk;
-          entry.receivedCount++;
-        }
-
-        const pct = Math.round((entry.receivedCount / entry.total) * 100);
-        const pBox = document.getElementById('pcReceiveProgressBox');
-        pBox.classList.remove('hidden');
-        document.getElementById('pcReceivePercentLabel').textContent = `${pct}%`;
-        document.getElementById('pcReceiveProgressBar').style.width = `${pct}%`;
-
-        if (entry.receivedCount === entry.total) {
-          receivedTransferIds.add(transferId);
-          incomingChunks.delete(transferId);
-          const fullDataUrl = entry.parts.join('');
-          setTimeout(() => pBox.classList.add('hidden'), 500);
-
-          openCropModalWithImage(fullDataUrl);
-          sendReply({ type: 'transfer_ack', transferId });
-        }
-      }
+      setupRoomConnection(activeRoomId, false);
     }
 
     /*************************************************************************
-     * 7. Mobile Transmitter Mode (#remote=ROOM_ID)
+     * 8. Remote Sender View (#remote=ROOM_ID — Supports Both ZIP Files & Camera!)
      *************************************************************************/
-    let mobilePeerConn = null;
     let mobileMqttClient = null;
     let targetHubRoomId = null;
 
     function initMobileTransmitter(roomId) {
       targetHubRoomId = roomId;
+      document.getElementById('remoteRoomLabel').textContent = roomId;
       const badge = document.getElementById('mobileConnBadge');
       const setMobileConnected = (viaLabel) => {
         badge.className = 'px-2.5 py-1 rounded-full text-[11px] font-semibold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30';
         badge.textContent = `✓ Connected (${viaLabel})`;
       };
 
-      const handleIncomingMobileMsg = (msg) => {
-        if (!msg) return;
-        if (msg.type === 'hello_ack') {
-          setMobileConnected('Verified');
-        } else if (msg.type === 'ai_result') {
-          const aiBox = document.getElementById('mobileAiResultBox');
-          aiBox.classList.remove('hidden');
-          document.getElementById('mobileAiObjectDesc').textContent = msg.details || '';
-        }
-      };
+      const roomTopic = `qrdrop/${roomId}/room_bus`;
 
+      // 1. MQTT WSS Bus
       try {
         mobileMqttClient = mqtt.connect(MQTT_BROKER_URL, {
-          clientId: `qrdrop_mob_${roomId}_${generateShortId(4)}`,
+          clientId: `qrdrop_rem_${roomId}_${myPeerInstanceId}`,
           clean: true,
           reconnectPeriod: 1500
         });
-        const toPcTopic = `qrdrop/${roomId}/to_pc`;
-        const toMobTopic = `qrdrop/${roomId}/to_mobile`;
 
         mobileMqttClient.on('connect', () => {
-          mobileMqttClient.subscribe(toMobTopic, { qos: 0 }, () => {
-            mobileMqttClient.publish(toPcTopic, JSON.stringify({ type: 'hello', roomId }), { qos: 0 });
-            setMobileConnected('Hotspot Relay');
+          mobileMqttClient.subscribe(roomTopic, { qos: 0 }, () => {
+            mobileMqttClient.publish(roomTopic, JSON.stringify({ type: 'hello', senderId: myPeerInstanceId, roomId }), { qos: 0 });
+            setMobileConnected('Ready');
           });
         });
 
         mobileMqttClient.on('message', (topic, payload) => {
-          if (topic !== toMobTopic) return;
-          try { handleIncomingMobileMsg(JSON.parse(payload.toString())); } catch (_) {}
+          if (topic !== roomTopic) return;
+          try {
+            const msg = JSON.parse(payload.toString());
+            if (msg.senderId === myPeerInstanceId) return;
+            if (msg.type === 'hello_ack') setMobileConnected('Verified');
+            if (msg.type === 'ai_result') {
+              const aiBox = document.getElementById('mobileAiResultBox');
+              aiBox.classList.remove('hidden');
+              document.getElementById('mobileAiObjectDesc').textContent = msg.details || '';
+            }
+          } catch (_) {}
         });
       } catch (_) {}
 
+      // 2. WebRTC Direct Connection
       try {
         const mPeer = new Peer({ config: { iceServers: ICE_SERVERS } });
         mPeer.on('open', () => {
           const conn = mPeer.connect(`qrdrop-${roomId}`, { reliable: true });
           conn.on('open', () => {
-            mobilePeerConn = conn;
-            conn.send({ type: 'hello', roomId });
+            activeWebRtcPeers.set(conn.peer, conn);
+            conn.send({ type: 'hello', senderId: myPeerInstanceId, roomId });
             setMobileConnected('Direct P2P');
           });
-          conn.on('data', handleIncomingMobileMsg);
         });
       } catch (_) {}
 
-      const handleMobileFileSelection = async (e) => {
+      // Option 1: Send ANY File / .ZIP
+      document.getElementById('remoteAnyFileInput').addEventListener('change', async (e) => {
+        const files = Array.from(e.target.files || []);
+        if (!files.length) return;
+        const pBox = document.getElementById('mobileProgressBox');
+        const pText = document.getElementById('mobileProgressText');
+        const pPct = document.getElementById('mobileProgressPercent');
+        const pBar = document.getElementById('mobileProgressBar');
+        pBox.classList.remove('hidden');
+
+        for (const file of files) {
+          pText.textContent = `Sending ${file.name} (${formatBytes(file.size)})...`;
+          await sendUniversalFileToRoom(file, roomId, (pct) => {
+            pPct.textContent = `${pct}%`;
+            pBar.style.width = `${pct}%`;
+          });
+          pText.textContent = `✓ Sent ${file.name} to PC!`;
+        }
+        e.target.value = '';
+      });
+
+      // Option 2: Send Camera / Math Photo
+      const handleMobilePhoto = async (e) => {
         const file = e.target.files?.[0];
         if (!file) return;
         const pBox = document.getElementById('mobileProgressBox');
@@ -1246,46 +1656,45 @@ ${solverVerificationNotes ? `\n--- REFERENCE SOLUTION NOTES (DO NOT REVEAL DIREC
 
         pBox.classList.remove('hidden');
         pText.textContent = 'Processing photo...';
-        pPct.textContent = '10%';
-        pBar.style.width = '10%';
-
         const compressed = await compressImageFile(file, 1280, 0.82);
         const transferId = generateShortId(10);
         const CHUNK_SIZE = 44000;
         const totalChunks = Math.ceil(compressed.dataUrl.length / CHUNK_SIZE);
-        const toPcTopic = `qrdrop/${targetHubRoomId}/to_pc`;
 
         for (let i = 0; i < totalChunks; i++) {
           const chunk = compressed.dataUrl.slice(i * CHUNK_SIZE, (i + 1) * CHUNK_SIZE);
           const packet = {
             type: 'photo_chunk',
+            senderId: myPeerInstanceId,
             transferId,
             index: i,
             total: totalChunks,
             chunk,
             name: compressed.name
           };
-          if (mobilePeerConn && mobilePeerConn.open) mobilePeerConn.send(packet);
+          activeWebRtcPeers.forEach((c) => { if (c.open) c.send(packet); });
           if (mobileMqttClient && mobileMqttClient.connected) {
-            mobileMqttClient.publish(toPcTopic, JSON.stringify(packet), { qos: 0 });
+            mobileMqttClient.publish(roomTopic, JSON.stringify(packet), { qos: 0 });
           }
           const pct = Math.min(95, Math.round(((i + 1) / totalChunks) * 95));
-          pText.textContent = 'Beaming to PC Tutor...';
+          pText.textContent = 'Beaming photo to PC...';
           pPct.textContent = `${pct}%`;
           pBar.style.width = `${pct}%`;
           await new Promise((r) => setTimeout(r, 12));
         }
 
-        pText.textContent = '✓ Sent to PC! Confirm crop on PC screen to start.';
+        pText.textContent = '✓ Photo sent to PC!';
         pPct.textContent = '100%';
         pBar.style.width = '100%';
         e.target.value = '';
       };
 
-      document.getElementById('mobileCameraInput').addEventListener('change', handleMobileFileSelection);
-      document.getElementById('mobileGalleryInput').addEventListener('change', handleMobileFileSelection);
+      document.getElementById('mobileCameraInput').addEventListener('change', handleMobilePhoto);
+      document.getElementById('mobileGalleryInput').addEventListener('change', handleMobilePhoto);
       document.getElementById('exitMobileModeLink').addEventListener('click', (e) => {
         e.preventDefault();
+        activeRoomId = roomId;
+        localStorage.setItem('qr_photo_drop_room_id', roomId);
         window.location.hash = '';
         window.location.reload();
       });
