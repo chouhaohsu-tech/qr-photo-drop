@@ -131,7 +131,7 @@
                 <input
                   id="geminiApiKeyInput"
                   type="password"
-                  placeholder="Paste AIzaSy... key here"
+                  placeholder="Paste your AQ... or AIzaSy... key here"
                   class="w-full bg-slate-900/90 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 pr-9"
                 />
                 <button id="toggleApiKeyBtn" type="button" class="absolute right-2.5 top-2 text-slate-400 hover:text-slate-200 text-xs">
@@ -702,40 +702,51 @@ Return ONLY a valid JSON object with the following keys:
   "details": "2 to 4 concise bullet points describing what the object is, its visible traits/material/color, any readable text/brand on it, and its primary use."
 }`;
 
-        // Try selected model first, with automatic fallback if needed
+        // Try selected model first, supporting both standard Gemini API and AQ. (Vertex AI Express / Google GenAI) keys!
         const candidateModels = [geminiModel, 'gemini-2.5-flash', 'gemini-2.0-flash'].filter((v, i, a) => a.indexOf(v) === i);
+        const isAqKey = geminiApiKey.startsWith('AQ.');
         let responseJson = null;
         let lastErr = null;
 
         for (const modelName of candidateModels) {
-          const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${geminiApiKey}`;
-          const res = await fetch(url, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              contents: [{
-                parts: [
-                  { text: promptText },
-                  { inline_data: { mime_type: mimeType, data: base64Data } }
-                ]
-              }],
-              generationConfig: {
-                temperature: 0.2,
-                responseMimeType: 'application/json'
-              }
-            })
-          });
+          const endpoints = isAqKey
+            ? [
+                `https://aiplatform.googleapis.com/v1/publishers/google/models/${modelName}:generateContent?key=${encodeURIComponent(geminiApiKey)}`,
+                `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${encodeURIComponent(geminiApiKey)}`
+              ]
+            : [
+                `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${encodeURIComponent(geminiApiKey)}`,
+                `https://aiplatform.googleapis.com/v1/publishers/google/models/${modelName}:generateContent?key=${encodeURIComponent(geminiApiKey)}`
+              ];
 
-          if (res.ok) {
-            responseJson = await res.json();
-            break;
-          } else {
-            const errBody = await res.json().catch(() => ({}));
-            lastErr = new Error(errBody.error?.message || `HTTP ${res.status}`);
-            if (res.status === 400 && lastErr.message.toLowerCase().includes('api key')) {
-              break; // Invalid API key, don't retry other models
+          for (const url of endpoints) {
+            const res = await fetch(url, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                contents: [{
+                  role: 'user',
+                  parts: [
+                    { text: promptText },
+                    { inline_data: { mime_type: mimeType, data: base64Data } }
+                  ]
+                }],
+                generationConfig: {
+                  temperature: 0.2,
+                  responseMimeType: 'application/json'
+                }
+              })
+            });
+
+            if (res.ok) {
+              responseJson = await res.json();
+              break;
+            } else {
+              const errBody = await res.json().catch(() => ({}));
+              lastErr = new Error(errBody.error?.message || `HTTP ${res.status}`);
             }
           }
+          if (responseJson) break;
         }
 
         if (!responseJson) {
