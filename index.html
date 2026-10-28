@@ -4,8 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
-  <title>QR Photo Drop + Gemini AI Vision — Instant Object Recognition</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📸</text></svg>" />
+  <title>🎓 QR Socratic Math Tutor — Guided Step-by-Step AI Math Coach</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎓</text></svg>" />
 
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -36,8 +36,12 @@
   <!-- Cropper.js -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js"></script>
-  <!-- JSZip for Download All -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <!-- Marked.js for Markdown rendering -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <!-- KaTeX for beautiful math formula rendering -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
 
   <style>
     ::-webkit-scrollbar { width: 6px; height: 6px; }
@@ -45,7 +49,7 @@
     ::-webkit-scrollbar-thumb { background: rgba(99, 102, 241, 0.35); border-radius: 4px; }
     ::-webkit-scrollbar-thumb:hover { background: rgba(99, 102, 241, 0.65); }
     .glass-card {
-      background: rgba(30, 41, 59, 0.72);
+      background: rgba(30, 41, 59, 0.75);
       backdrop-filter: blur(14px);
       border: 1px solid rgba(255, 255, 255, 0.08);
     }
@@ -53,66 +57,66 @@
       margin: 0 auto;
       border-radius: 8px;
     }
+    .math-prose p { margin-bottom: 0.65rem; line-height: 1.65; }
+    .math-prose p:last-child { margin-bottom: 0; }
+    .math-prose ul, .math-prose ol { margin-left: 1.25rem; margin-bottom: 0.65rem; list-style-type: disc; }
+    .math-prose ol { list-style-type: decimal; }
+    .math-prose li { margin-bottom: 0.25rem; }
+    .math-prose strong { color: #e0e7ff; font-weight: 700; }
+    .math-prose code { background: rgba(15, 23, 42, 0.7); padding: 0.15rem 0.35rem; border-radius: 0.25rem; font-size: 0.85em; }
+    .katex-display { margin: 0.65rem 0; overflow-x: auto; overflow-y: hidden; }
   </style>
 </head>
 <body class="bg-[#0b1120] text-slate-100 min-h-screen flex flex-col antialiased selection:bg-indigo-500 selection:text-white">
 
   <!-- ===================================================================== -->
-  <!-- 1. DESKTOP / MAIN HUB VIEW                                            -->
+  <!-- 1. DESKTOP / MAIN SOCRATIC TUTOR HUB                                  -->
   <!-- ===================================================================== -->
   <div id="desktopView" class="flex-1 flex flex-col min-h-screen">
     <!-- Top Header -->
-    <header class="glass-card sticky top-0 z-30 border-b border-slate-800/80 px-4 sm:px-8 py-4">
+    <header class="glass-card sticky top-0 z-30 border-b border-slate-800/80 px-4 sm:px-8 py-3.5">
       <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
         <div class="flex items-center space-x-3">
           <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-xl shadow-lg shadow-indigo-500/25">
-            📸
+            🎓
           </div>
           <div>
             <div class="flex items-center space-x-2">
-              <h1 class="font-bold text-lg sm:text-xl text-white tracking-tight">QR Photo Drop <span class="text-indigo-400">+ Gemini Vision</span></h1>
+              <h1 class="font-bold text-lg sm:text-xl text-white tracking-tight">Socratic AI Math Tutor <span class="text-indigo-400">× QR Drop</span></h1>
               <span class="px-2 py-0.5 text-[11px] font-semibold rounded-full bg-indigo-500/15 text-indigo-300 border border-indigo-500/30">
-                Auto AI Object ID
+                Step-by-Step Guided
               </span>
             </div>
-            <p class="text-xs text-slate-400">Upload photos via QR code &amp; Gemini AI automatically identifies what is in the photo</p>
+            <p class="text-xs text-slate-400">Snap a math problem or your handwritten work via QR code — AI guides you step by step without spoiling the answer</p>
           </div>
         </div>
 
         <!-- Connection Status & Actions -->
         <div class="flex items-center space-x-3">
           <div id="pcConnectionBadge" class="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium bg-amber-500/10 text-amber-300 border border-amber-500/25">
-            <span class="relative flex h-2 w-2 mr-2">
-              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
-              <span class="relative inline-flex rounded-full h-2 w-2 bg-amber-400"></span>
-            </span>
+            <span class="w-2 h-2 rounded-full bg-amber-400 mr-2 animate-pulse"></span>
             <span id="pcConnectionText">Initializing tunnel...</span>
           </div>
 
-          <button id="downloadAllBtn" class="hidden items-center space-x-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-600/25 transition">
-            <span>📦</span>
-            <span>Download All (.ZIP)</span>
-          </button>
-
-          <button id="clearAllBtn" class="hidden items-center space-x-1 px-3 py-2 rounded-xl text-xs font-medium bg-slate-800 hover:bg-rose-500/20 text-slate-300 hover:text-rose-300 border border-slate-700 hover:border-rose-500/30 transition">
-            <span>🗑️</span>
-            <span>Clear</span>
+          <button id="newProblemBtn" class="inline-flex items-center space-x-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition">
+            <span>🔄</span>
+            <span>Reset / New Problem</span>
           </button>
         </div>
       </div>
     </header>
 
     <!-- Main Content Grid -->
-    <main class="max-w-7xl w-full mx-auto flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6 p-4 sm:p-8">
+    <main class="max-w-7xl w-full mx-auto flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6 p-4 sm:p-6">
       
-      <!-- Left Column: Gemini AI Settings + QR Code + Upload Controls (4 cols) -->
+      <!-- Left Column: Settings + QR Code + Upload Controls (4 cols) -->
       <section class="lg:col-span-4 space-y-5">
 
-        <!-- ✨ Gemini AI Vision Configuration Card -->
-        <div id="geminiConfigCard" class="glass-card rounded-2xl p-5 shadow-xl border border-indigo-500/30 relative overflow-hidden">
+        <!-- ✨ Gemini AI Configuration Card -->
+        <div class="glass-card rounded-2xl p-5 shadow-xl border border-indigo-500/30">
           <div class="flex items-center justify-between mb-2.5">
-            <h2 class="text-sm font-bold uppercase tracking-wider text-indigo-300 flex items-center gap-2">
-              <span>✨</span> Gemini AI Object Recognition
+            <h2 class="text-xs font-bold uppercase tracking-wider text-indigo-300 flex items-center gap-1.5">
+              <span>⚙️</span> AI Tutor Settings
             </h2>
             <span id="apiKeyStatusBadge" class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-500/15 text-amber-300 border border-amber-500/30">
               API Key Needed
@@ -138,163 +142,205 @@
                   👁️
                 </button>
               </div>
-              <p class="text-[11px] text-slate-400 mt-1 leading-relaxed">
-                🔒 Stored only in your own browser (`localStorage`), never uploaded to any server.
-              </p>
             </div>
 
             <div class="grid grid-cols-2 gap-2">
               <div>
                 <label for="geminiModelSelect" class="block text-[11px] text-slate-400 mb-1">Model</label>
-                <select id="geminiModelSelect" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                  <option value="gemini-3.8-flash" selected>Gemini 3.8 Flash (Recommended)</option>
-                  <option value="gemini-4-argon">Gemini 4 Argon (Advanced)</option>
+                <select id="geminiModelSelect" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                  <option value="gemini-3.8-flash" selected>Gemini 3.8 Flash</option>
+                  <option value="gemini-4-argon">Gemini 4 Argon</option>
                   <option value="gemini-3.1-pro-preview">Gemini 3.1 Pro</option>
-                  <option value="gemini-3.5-flash-lite">Gemini 3.5 Flash-Lite (Fastest)</option>
+                  <option value="gemini-3.5-flash-lite">Gemini 3.5 Flash-Lite</option>
                 </select>
               </div>
               <div>
-                <label for="geminiLangSelect" class="block text-[11px] text-slate-400 mb-1">Response Language</label>
-                <select id="geminiLangSelect" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                  <option value="Bilingual (English & Traditional Chinese 繁體中文)" selected>English + 繁體中文</option>
-                  <option value="English">English Only</option>
-                  <option value="Traditional Chinese (繁體中文)">繁體中文 Only</option>
+                <label for="geminiLangSelect" class="block text-[11px] text-slate-400 mb-1">Tutor Language</label>
+                <select id="geminiLangSelect" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                  <option value="English" selected>English</option>
+                  <option value="Traditional Chinese (繁體中文)">繁體中文</option>
+                  <option value="Bilingual (English & Traditional Chinese 繁體中文)">English + 繁體中文</option>
                 </select>
               </div>
+            </div>
+
+            <!-- AI Mode Selector (Math Tutor vs Object ID) -->
+            <div>
+              <label for="aiModeSelect" class="block text-[11px] text-slate-400 mb-1">AI Mode when Photo Arrives</label>
+              <select id="aiModeSelect" class="w-full bg-indigo-950/60 border border-indigo-500/40 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-indigo-200 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                <option value="math_tutor" selected>🎓 Socratic Math Tutor (Guide Me Step-by-Step, Never Spoil Answer)</option>
+                <option value="object_id">🔍 Object Identifier (Tell Me What Object Is in Photo)</option>
+              </select>
             </div>
           </div>
         </div>
 
         <!-- QR Code Card -->
-        <div class="glass-card rounded-2xl p-6 shadow-xl relative overflow-hidden">
-          <div class="flex items-center justify-between mb-3">
-            <h2 class="text-sm font-bold uppercase tracking-wider text-indigo-300 flex items-center gap-2">
-              <span>📱</span> Scan with Phone to Upload
+        <div class="glass-card rounded-2xl p-5 shadow-xl relative overflow-hidden">
+          <div class="flex items-center justify-between mb-2">
+            <h2 class="text-xs font-bold uppercase tracking-wider text-indigo-300 flex items-center gap-1.5">
+              <span>📱</span> Scan with Phone to Snap Question
             </h2>
-            <button id="refreshRoomBtn" title="Generate new room QR code" class="text-xs text-slate-400 hover:text-white px-2 py-1 rounded-lg hover:bg-slate-800 transition">
+            <button id="refreshRoomBtn" title="Generate new room QR code" class="text-[11px] text-slate-400 hover:text-white px-2 py-0.5 rounded-lg hover:bg-slate-800 transition">
               🔄 New Code
             </button>
           </div>
 
-          <p class="text-xs text-slate-400 mb-4 leading-relaxed">
-            Scan this QR code with your phone. Every photo you snap will beam here and <strong>Gemini will immediately tell you what the object is!</strong>
+          <p class="text-xs text-slate-400 mb-3 leading-relaxed">
+            Scan once with your phone to snap your <strong>math problem</strong> (or a photo of your <strong>handwritten steps</strong> so the tutor can check your work!).
           </p>
 
           <!-- QR Canvas Wrapper -->
-          <div class="bg-white p-4 rounded-2xl shadow-inner mx-auto w-fit qr-box relative">
-            <div id="mainQrContainer" class="w-[190px] h-[190px] flex items-center justify-center text-slate-400 text-xs">
+          <div class="bg-white p-3.5 rounded-2xl shadow-inner mx-auto w-fit qr-box relative">
+            <div id="mainQrContainer" class="w-[176px] h-[176px] flex items-center justify-center text-slate-400 text-xs">
               Generating QR...
             </div>
           </div>
 
-          <!-- Room Code & Copy Link -->
-          <div class="mt-4 pt-4 border-t border-slate-800/80 flex items-center justify-between text-xs">
+          <div class="mt-3 pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs">
             <div class="text-slate-400">
               Room ID: <span id="roomIdLabel" class="font-mono font-semibold text-slate-200">---</span>
             </div>
             <button id="copyUploadLinkBtn" class="text-indigo-400 hover:text-indigo-300 font-medium flex items-center gap-1 transition">
-              <span>🔗</span> Copy Upload Link
+              <span>🔗</span> Copy Link
             </button>
           </div>
 
-          <!-- Connected Peers Indicator -->
-          <div id="connectedDevicesBanner" class="hidden mt-4 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/25 text-emerald-300 text-xs flex items-center justify-between">
-            <div class="flex items-center gap-2">
-              <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
-              <span class="font-semibold">Phone Connected! Ready to receive photos</span>
-            </div>
+          <!-- Connected Indicator -->
+          <div id="connectedDevicesBanner" class="hidden mt-3 p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/25 text-emerald-300 text-xs flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span class="font-semibold">Phone Connected! Snap a math problem anytime</span>
           </div>
 
           <!-- Incoming Transfer Progress Bar -->
-          <div id="pcReceiveProgressBox" class="hidden mt-4 p-3 rounded-xl bg-indigo-500/10 border border-indigo-500/25">
-            <div class="flex justify-between text-xs text-indigo-300 mb-1.5 font-medium">
-              <span id="pcReceiveStatusLabel">Receiving photo from phone...</span>
+          <div id="pcReceiveProgressBox" class="hidden mt-3 p-2.5 rounded-xl bg-indigo-500/10 border border-indigo-500/25">
+            <div class="flex justify-between text-xs text-indigo-300 mb-1 font-medium">
+              <span>Receiving photo from phone...</span>
               <span id="pcReceivePercentLabel">0%</span>
             </div>
-            <div class="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
+            <div class="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
               <div id="pcReceiveProgressBar" class="h-full bg-gradient-to-r from-indigo-500 to-purple-500 transition-all duration-150" style="width: 0%"></div>
             </div>
           </div>
         </div>
 
         <!-- Upload from PC Card -->
-        <div class="glass-card rounded-2xl p-5 shadow-xl">
-          <h2 class="text-sm font-bold uppercase tracking-wider text-purple-300 flex items-center gap-2 mb-2">
-            <span>💻</span> Or Drop a Photo from PC
-          </h2>
-          <label id="pcDropZone" for="pcFileInput" class="border-2 border-dashed border-slate-700 hover:border-indigo-500/70 bg-slate-900/50 hover:bg-indigo-500/5 transition rounded-2xl p-5 flex flex-col items-center justify-center cursor-pointer text-center group">
-            <div class="w-10 h-10 rounded-full bg-slate-800 group-hover:bg-indigo-500/20 flex items-center justify-center text-xl mb-1.5 transition">
-              📤
-            </div>
-            <span class="text-xs font-semibold text-slate-200 group-hover:text-indigo-300 transition">Click, Drag &amp; Drop, or Ctrl+V Paste</span>
-            <span class="text-[11px] text-slate-500 mt-0.5">Gemini will identify the object immediately</span>
-            <input id="pcFileInput" type="file" accept="image/*" multiple class="hidden" />
+        <div class="glass-card rounded-2xl p-4 shadow-xl">
+          <label id="pcDropZone" for="pcFileInput" class="border-2 border-dashed border-slate-700 hover:border-indigo-500/70 bg-slate-900/50 hover:bg-indigo-500/5 transition rounded-xl p-4 flex flex-col items-center justify-center cursor-pointer text-center group">
+            <span class="text-xl mb-1">💻</span>
+            <span class="text-xs font-semibold text-slate-200 group-hover:text-indigo-300 transition">Or Drop / Paste (Ctrl+V) Math Image from PC</span>
+            <span class="text-[11px] text-slate-500 mt-0.5">You can crop to a single question before sending</span>
+            <input id="pcFileInput" type="file" accept="image/*" class="hidden" />
           </label>
         </div>
+
       </section>
 
-      <!-- Right Column: Latest AI Object Recognition Spotlight + Photo Gallery (8 cols) -->
-      <section class="lg:col-span-8 flex flex-col space-y-6">
-
-        <!-- ✨ Latest Gemini Object Recognition Spotlight Banner (Hidden until a photo is uploaded) -->
-        <div id="aiSpotlightCard" class="hidden glass-card rounded-2xl p-6 border border-indigo-500/40 shadow-2xl relative overflow-hidden">
-          <div class="absolute -top-24 -right-24 w-56 h-56 bg-indigo-500/15 rounded-full blur-3xl pointer-events-none"></div>
-          <div class="flex items-center justify-between mb-4">
-            <div class="flex items-center gap-2">
-              <span class="text-xl">✨</span>
-              <h2 class="text-base font-bold text-white">Gemini AI Object Identification</h2>
-              <span id="spotlightStatusPill" class="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
-                Analyzing...
-              </span>
+      <!-- Right Column: Interactive Socratic Math Tutor Workspace (8 cols) -->
+      <section class="lg:col-span-8 flex flex-col h-[calc(100vh-6rem)] min-h-[600px]">
+        <div class="glass-card rounded-2xl flex-1 flex flex-col shadow-2xl overflow-hidden border border-slate-800">
+          
+          <!-- Tutor Top Bar / Internal Verification Drawer Toggle -->
+          <div class="px-5 py-3.5 border-b border-slate-800/90 bg-slate-900/60 flex flex-wrap items-center justify-between gap-2">
+            <div class="flex items-center gap-2.5">
+              <span class="w-2.5 h-2.5 rounded-full bg-indigo-400"></span>
+              <h2 class="text-sm font-bold text-white">Guided Problem-Solving Session</h2>
+              <span class="text-[11px] text-slate-400 hidden sm:inline">• One small question at a time</span>
             </div>
-            <button id="reAnalyzeSpotlightBtn" class="px-3 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs text-indigo-300 font-medium transition">
-              🔄 Re-Analyze
+            <div class="flex items-center gap-2">
+              <button id="toggleSolverNotesBtn" class="hidden px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-[11px] text-amber-300 border border-amber-500/30 font-medium transition">
+                🧠 View AI's Hidden Scratchpad
+              </button>
+            </div>
+          </div>
+
+          <!-- Hidden Solver Scratchpad (Collapsible, like the "AI Inner Thoughts" in the YouTube video!) -->
+          <div id="solverScratchpadDrawer" class="hidden bg-amber-950/30 border-b border-amber-500/30 p-4 text-xs text-amber-100/90 max-h-48 overflow-y-auto space-y-1">
+            <div class="font-bold text-amber-300 uppercase tracking-wider text-[10px]">🔒 AI Internal Math Verification (Spoiler Warning!)</div>
+            <div id="solverScratchpadContent" class="math-prose text-xs whitespace-pre-line"></div>
+          </div>
+
+          <!-- Chat Messages Area -->
+          <div id="tutorChatContainer" class="flex-1 overflow-y-auto p-5 space-y-5">
+            <!-- Welcome Empty State -->
+            <div id="tutorWelcomeState" class="h-full flex flex-col items-center justify-center text-center py-12 px-4">
+              <div class="w-16 h-16 rounded-2xl bg-indigo-500/15 border border-indigo-500/30 flex items-center justify-center text-3xl mb-4 shadow-inner">
+                📐
+              </div>
+              <h3 class="text-base font-bold text-white mb-1.5">Ready to Guide You Through Any Math Problem!</h3>
+              <p class="text-xs text-slate-400 max-w-md leading-relaxed mb-5">
+                Scan the QR code on the left with your phone to snap a photo of a math question (or drop/paste a screenshot from your PC).
+              </p>
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-xl w-full text-left text-xs">
+                <div class="p-3.5 rounded-xl bg-slate-900/80 border border-slate-800">
+                  <div class="font-bold text-indigo-300 mb-1">1. Snap Question 📸</div>
+                  <p class="text-[11px] text-slate-400">Crop to the exact problem you want to solve.</p>
+                </div>
+                <div class="p-3.5 rounded-xl bg-slate-900/80 border border-slate-800">
+                  <div class="font-bold text-purple-300 mb-1">2. Step-by-Step Guide 🧭</div>
+                  <p class="text-[11px] text-slate-400">The AI never spoils the final answer—it asks you one guiding question at a time.</p>
+                </div>
+                <div class="p-3.5 rounded-xl bg-slate-900/80 border border-slate-800">
+                  <div class="font-bold text-emerald-300 mb-1">3. Snap Handwritten Work ✍️</div>
+                  <p class="text-[11px] text-slate-400">Stuck? Reply in chat or snap a photo of your handwritten steps for feedback!</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick Action Pills (Shown when a tutoring session is active) -->
+          <div id="quickPromptsBar" class="hidden px-4 py-2 bg-slate-900/80 border-t border-slate-800/80 flex flex-wrap items-center gap-2">
+            <span class="text-[11px] text-slate-400 mr-1">Need help?</span>
+            <button data-quick="Can you give me a smaller hint for this step without giving away the answer?" class="px-2.5 py-1 rounded-full bg-indigo-500/15 hover:bg-indigo-500/25 text-indigo-300 border border-indigo-500/30 text-[11px] font-medium transition">
+              💡 Give me a smaller hint
+            </button>
+            <button data-quick="What formula or concept should I think about here?" class="px-2.5 py-1 rounded-full bg-purple-500/15 hover:bg-purple-500/25 text-purple-300 border border-purple-500/30 text-[11px] font-medium transition">
+              📘 Which formula applies here?
+            </button>
+            <button data-quick="I don't know how to do this current step. Can you explain just this step and then let me try the next one?" class="px-2.5 py-1 rounded-full bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-500/30 text-[11px] font-medium transition">
+              🤔 Explain just this step
             </button>
           </div>
 
-          <div class="grid grid-cols-1 md:grid-cols-12 gap-5 items-start">
-            <div class="md:col-span-4 bg-slate-950 rounded-xl overflow-hidden border border-slate-800 aspect-[4/3] flex items-center justify-center">
-              <img id="spotlightImg" src="" alt="Analyzed photo" class="w-full h-full object-contain" />
-            </div>
-            <div class="md:col-span-8 space-y-3">
+          <!-- Pending Image Attachment Bar (If user attached/cropped an image before sending) -->
+          <div id="pendingAttachmentBar" class="hidden px-4 py-2.5 bg-indigo-950/60 border-t border-indigo-500/30 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <img id="pendingAttachmentThumb" src="" class="w-12 h-12 rounded-lg object-cover border border-indigo-400/50" />
               <div>
-                <div class="text-[11px] uppercase tracking-wider text-slate-400 font-semibold">Detected Object</div>
-                <h3 id="spotlightObjectName" class="text-xl font-extrabold text-white mt-0.5">Identifying object in photo...</h3>
-              </div>
-              <div id="spotlightCategoryRow" class="hidden flex flex-wrap gap-2">
-                <span id="spotlightCategoryBadge" class="px-2.5 py-1 rounded-lg bg-purple-500/15 text-purple-300 border border-purple-500/30 text-xs font-medium"></span>
-              </div>
-              <div id="spotlightDescription" class="text-sm text-slate-200 leading-relaxed bg-slate-900/75 p-4 rounded-xl border border-slate-800/90 whitespace-pre-line">
-                Waiting for Gemini AI response...
+                <div class="text-xs font-bold text-indigo-200">Photo attached &amp; ready!</div>
+                <div class="text-[11px] text-indigo-300/80">Type a note below or press Send to start guided tutoring</div>
               </div>
             </div>
-          </div>
-        </div>
-
-        <!-- Photo Gallery Card -->
-        <div class="glass-card rounded-2xl p-6 flex-1 flex flex-col shadow-xl">
-          <div class="flex items-center justify-between pb-4 mb-6 border-b border-slate-800/80">
-            <div class="flex items-center gap-2.5">
-              <h2 class="text-base font-bold text-white">Uploaded Photos &amp; AI Results</h2>
-              <span id="photoCountBadge" class="px-2.5 py-0.5 text-xs font-bold rounded-full bg-slate-800 text-indigo-400 border border-slate-700">0</span>
+            <div class="flex items-center gap-2">
+              <button id="reCropPendingBtn" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs text-slate-200">
+                ✂️ Crop
+              </button>
+              <button id="clearPendingBtn" class="px-2 py-1 rounded-lg bg-slate-800 hover:bg-rose-600 text-xs text-slate-300 hover:text-white">
+                ✕
+              </button>
             </div>
-            <span class="text-xs text-slate-400">Click any photo to view, crop, re-identify, or share via QR</span>
           </div>
 
-          <!-- Empty State -->
-          <div id="emptyGalleryState" class="flex-1 flex flex-col items-center justify-center text-center py-16 px-4">
-            <div class="w-20 h-20 rounded-3xl bg-slate-800/70 border border-slate-700/60 flex items-center justify-center text-4xl mb-4 shadow-inner">
-              🔍
-            </div>
-            <h3 class="text-base font-semibold text-slate-200 mb-1">Upload a photo to identify any object</h3>
-            <p class="text-xs text-slate-400 max-w-md leading-relaxed">
-              1. Paste your free <strong>Gemini API Key</strong> on the left.<br />
-              2. Scan the QR code with your phone (or drop an image from your PC) — Gemini will immediately tell you what the object in the photo is!
-            </p>
+          <!-- Chat Input Bar -->
+          <div class="p-3.5 bg-slate-900/90 border-t border-slate-800 flex items-end gap-2.5">
+            <label for="pcFileInput" title="Upload math photo from PC" class="cursor-pointer p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 transition shrink-0">
+              📷
+            </label>
+            <textarea
+              id="chatInput"
+              rows="1"
+              placeholder="Reply to your tutor's question, type your step, or upload a photo..."
+              class="flex-1 bg-slate-950 border border-slate-700/90 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none max-h-32"
+            ></textarea>
+            <button
+              id="sendChatBtn"
+              class="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white font-bold text-sm shadow-lg shadow-indigo-600/25 transition shrink-0 flex items-center gap-1.5"
+            >
+              <span>Send</span>
+              <span>➤</span>
+            </button>
           </div>
 
-          <!-- Photo Grid -->
-          <div id="photoGrid" class="hidden grid grid-cols-1 sm:grid-cols-2 gap-5 auto-rows-max"></div>
         </div>
       </section>
 
@@ -309,10 +355,10 @@
       <!-- Header -->
       <div class="glass-card rounded-2xl p-4 flex items-center justify-between">
         <div class="flex items-center gap-3">
-          <span class="text-2xl">📸</span>
+          <span class="text-2xl">🎓</span>
           <div>
-            <h1 class="font-bold text-base text-white">QR Photo Drop + AI</h1>
-            <p class="text-[11px] text-indigo-400">Snap a photo to identify the object</p>
+            <h1 class="font-bold text-base text-white">Socratic Math Tutor</h1>
+            <p class="text-[11px] text-indigo-400">Snap math problem or handwritten work</p>
           </div>
         </div>
         <div id="mobileConnBadge" class="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-amber-500/15 text-amber-300 border border-amber-500/30">
@@ -324,24 +370,15 @@
       <div class="glass-card rounded-2xl p-6 flex-1 flex flex-col justify-between space-y-6">
         <div class="space-y-4">
           <div class="text-center">
-            <h2 class="text-lg font-bold text-white">Snap &amp; Identify Object</h2>
-            <p class="text-xs text-slate-400 mt-1">Take a photo with your camera. It will beam to your PC and Gemini AI will tell you what the object is!</p>
-          </div>
-
-          <!-- Compression Quality Selector -->
-          <div class="flex items-center justify-between bg-slate-900/80 p-3 rounded-xl border border-slate-800 text-xs">
-            <span class="text-slate-300 font-medium">Image Quality:</span>
-            <select id="mobileQualitySelect" class="bg-slate-800 text-slate-100 rounded-lg px-2.5 py-1 border border-slate-700 focus:outline-none">
-              <option value="1600" selected>⚡ Fast HD (1600px • Recommended)</option>
-              <option value="2400">✨ Ultra HD (2400px)</option>
-            </select>
+            <h2 class="text-lg font-bold text-white">Send Math Photo to PC Tutor</h2>
+            <p class="text-xs text-slate-400 mt-1">Snap a textbook question OR snap your handwritten calculation so the tutor can check your step!</p>
           </div>
 
           <!-- Two Big Action Buttons: Camera & Gallery -->
           <div class="grid grid-cols-1 gap-3.5 pt-2">
             <label for="mobileCameraInput" class="cursor-pointer py-5 px-4 rounded-2xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold text-center shadow-lg shadow-indigo-600/30 flex flex-col items-center justify-center gap-2 active:scale-[0.98] transition">
               <span class="text-3xl">📷</span>
-              <span class="text-base">Take a Photo Now</span>
+              <span class="text-base">Take Photo of Math / Work</span>
               <span class="text-[11px] text-indigo-100 font-normal">Opens your phone camera directly</span>
               <input id="mobileCameraInput" type="file" accept="image/*" capture="environment" class="hidden" />
             </label>
@@ -349,8 +386,7 @@
             <label for="mobileGalleryInput" class="cursor-pointer py-4 px-4 rounded-2xl bg-slate-800/90 hover:bg-slate-800 border border-slate-700 text-slate-100 font-semibold text-center flex flex-col items-center justify-center gap-1.5 active:scale-[0.98] transition">
               <span class="text-2xl">🖼️</span>
               <span class="text-sm">Choose from Photo Library</span>
-              <span class="text-[11px] text-slate-400 font-normal">Select 1 or multiple photos</span>
-              <input id="mobileGalleryInput" type="file" accept="image/*" multiple class="hidden" />
+              <input id="mobileGalleryInput" type="file" accept="image/*" class="hidden" />
             </label>
           </div>
 
@@ -365,25 +401,18 @@
             </div>
           </div>
 
-          <!-- Live AI Result Card on Mobile (Beamed back from PC!) -->
+          <!-- Live Tutor Feedback on Mobile -->
           <div id="mobileAiResultBox" class="hidden p-4 rounded-2xl bg-indigo-950/60 border border-indigo-500/40 space-y-2">
             <div class="text-[11px] font-bold uppercase tracking-wider text-indigo-300 flex items-center gap-1.5">
-              <span>✨</span> Gemini AI Object Result
+              <span>🎓</span> Tutor Guidance (Also shown on PC)
             </div>
-            <div id="mobileAiObjectTitle" class="text-base font-extrabold text-white">Analyzing on PC...</div>
-            <div id="mobileAiObjectDesc" class="text-xs text-slate-300 leading-relaxed whitespace-pre-line"></div>
-          </div>
-
-          <!-- Sent History List on Phone -->
-          <div id="mobileSentListContainer" class="hidden space-y-2 pt-2">
-            <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Sent in this session</h3>
-            <div id="mobileSentList" class="grid grid-cols-3 gap-2"></div>
+            <div id="mobileAiObjectDesc" class="text-xs text-slate-200 leading-relaxed whitespace-pre-line"></div>
           </div>
         </div>
 
         <div class="pt-4 border-t border-slate-800/80 text-center">
           <a href="#" id="exitMobileModeLink" class="text-xs text-slate-400 hover:text-slate-200 underline">
-            Switch to Full Gallery / Desktop Mode
+            Switch to Desktop Tutor View
           </a>
         </div>
       </div>
@@ -391,91 +420,22 @@
   </div>
 
   <!-- ===================================================================== -->
-  <!-- 3. MOBILE PHOTO RECEIVER VIEW (#receive=ROOM_ID&photo=PHOTO_ID)       -->
-  <!-- ===================================================================== -->
-  <div id="mobileReceiveView" class="hidden min-h-screen flex flex-col bg-[#0b1120] p-4 sm:p-6">
-    <div class="max-w-md w-full mx-auto flex-1 flex flex-col space-y-5">
-      <div class="glass-card rounded-2xl p-4 flex items-center justify-between">
-        <div class="flex items-center gap-2.5">
-          <span class="text-2xl">📲</span>
-          <div>
-            <h1 class="font-bold text-base text-white">Download Shared Photo</h1>
-            <p class="text-[11px] text-indigo-400">Direct P2P Photo Transfer</p>
-          </div>
-        </div>
-        <span id="receiveStatusBadge" class="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-amber-500/15 text-amber-300 border border-amber-500/30">
-          Fetching...
-        </span>
-      </div>
-
-      <div class="glass-card rounded-2xl p-6 flex-1 flex flex-col items-center justify-center text-center space-y-5">
-        <div id="receiveLoadingBox" class="space-y-4 py-8 w-full">
-          <div class="w-14 h-14 rounded-2xl bg-indigo-500/15 border border-indigo-500/30 flex items-center justify-center text-2xl mx-auto animate-bounce">
-            📥
-          </div>
-          <p id="receiveLoadingText" class="text-sm font-medium text-slate-200">Connecting to sender to retrieve photo...</p>
-          <div class="w-full max-w-xs mx-auto h-2 bg-slate-800 rounded-full overflow-hidden">
-            <div id="receiveProgressBar" class="h-full bg-indigo-500 transition-all duration-150" style="width: 15%"></div>
-          </div>
-        </div>
-
-        <div id="receivedPhotoCard" class="hidden w-full space-y-4">
-          <div class="rounded-xl overflow-hidden bg-slate-950 border border-slate-800 p-2">
-            <img id="receivedPhotoImg" src="" alt="Received Photo" class="max-h-[60vh] w-auto mx-auto rounded-lg object-contain" />
-          </div>
-          <p class="text-xs text-slate-400">Tip: On iPhone/Android, you can also long-press the image above and tap <strong>"Save to Photos"</strong>.</p>
-          <a id="receivedPhotoDownloadBtn" href="#" download="photo.jpg" class="block w-full py-3.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm shadow-lg shadow-indigo-600/30 transition">
-            💾 Download Photo to Device
-          </a>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ===================================================================== -->
-  <!-- MODAL A: SHARE INDIVIDUAL PHOTO VIA QR CODE                           -->
-  <!-- ===================================================================== -->
-  <div id="shareQrModal" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="glass-card rounded-2xl max-w-sm w-full p-6 space-y-4 border border-slate-700 shadow-2xl">
-      <div class="flex items-center justify-between">
-        <h3 class="font-bold text-base text-white flex items-center gap-2">
-          <span>📲</span> Scan to Download Photo
-        </h3>
-        <button id="closeShareQrModalBtn" class="text-slate-400 hover:text-white text-lg leading-none px-2 py-1">✕</button>
-      </div>
-      <p class="text-xs text-slate-400 leading-relaxed">
-        Scan this QR code with any phone to beam this photo directly to that phone (keep this window open while scanning).
-      </p>
-      <div class="bg-white p-4 rounded-2xl w-fit mx-auto qr-box">
-        <div id="singlePhotoQrContainer" class="w-[200px] h-[200px] flex items-center justify-center"></div>
-      </div>
-      <div class="flex items-center gap-2 pt-2">
-        <img id="shareModalThumb" src="" class="w-12 h-12 rounded-lg object-cover border border-slate-700" />
-        <div class="text-left flex-1 min-w-0">
-          <div id="shareModalName" class="text-xs font-semibold text-slate-200 truncate">Photo</div>
-          <div class="text-[11px] text-emerald-400">Ready for phone scan</div>
-        </div>
-        <button id="copySinglePhotoLinkBtn" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs text-indigo-300 font-medium">
-          Copy Link
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ===================================================================== -->
-  <!-- MODAL B: CROP & ROTATE PHOTO (Cropper.js)                             -->
+  <!-- MODAL: CROP & ROTATE MATH QUESTION (Cropper.js)                       -->
   <!-- ===================================================================== -->
   <div id="cropModal" class="hidden fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="glass-card rounded-2xl max-w-2xl w-full p-5 space-y-4 border border-slate-700 shadow-2xl flex flex-col max-h-[90vh]">
+    <div class="glass-card rounded-2xl max-w-2xl w-full p-5 space-y-4 border border-slate-700 shadow-2xl flex flex-col max-h-[92vh]">
       <div class="flex items-center justify-between">
-        <h3 class="font-bold text-base text-white flex items-center gap-2">
-          <span>✂️</span> Crop &amp; Rotate Photo
-        </h3>
+        <div>
+          <h3 class="font-bold text-base text-white flex items-center gap-2">
+            <span>✂️</span> Crop to the Math Question (or Your Handwritten Work)
+          </h3>
+          <p class="text-[11px] text-slate-400">Crop tightly around the single question you want the tutor to guide you through</p>
+        </div>
         <button id="closeCropModalBtn" class="text-slate-400 hover:text-white text-lg leading-none px-2 py-1">✕</button>
       </div>
 
-      <div class="flex-1 bg-slate-950 rounded-xl overflow-hidden max-h-[62vh] flex items-center justify-center">
-        <img id="cropImageTarget" src="" alt="Crop target" class="max-h-[60vh] max-w-full block" />
+      <div class="flex-1 bg-slate-950 rounded-xl overflow-hidden max-h-[60vh] flex items-center justify-center">
+        <img id="cropImageTarget" src="" alt="Crop target" class="max-h-[58vh] max-w-full block" />
       </div>
 
       <div class="flex flex-wrap items-center justify-between gap-2 pt-2">
@@ -491,11 +451,11 @@
           </button>
         </div>
         <div class="flex items-center gap-2">
-          <button id="cancelCropBtn" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-medium text-slate-300 transition">
+          <button id="cancelCropBtn" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-medium text-slate-300 transition">
             Cancel
           </button>
-          <button id="saveCropBtn" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-xs font-bold text-white shadow-lg shadow-indigo-600/25 transition">
-            ✓ Save &amp; Re-Identify with Gemini
+          <button id="confirmCropAndSendBtn" class="px-4 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-xs font-bold text-white shadow-lg shadow-indigo-600/25 transition">
+            🎓 Confirm Crop &amp; Start Guided Tutoring
           </button>
         </div>
       </div>
@@ -503,93 +463,11 @@
   </div>
 
   <!-- ===================================================================== -->
-  <!-- MODAL C: FULLSCREEN LIGHTBOX                                          -->
-  <!-- ===================================================================== -->
-  <div id="lightboxModal" class="hidden fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md flex flex-col items-center justify-center p-4">
-    <button id="closeLightboxBtn" class="absolute top-4 right-4 w-10 h-10 rounded-full bg-slate-800/80 hover:bg-slate-700 text-white flex items-center justify-center text-lg">
-      ✕
-    </button>
-    <img id="lightboxImg" src="" alt="Full view" class="max-h-[85vh] max-w-[92vw] rounded-xl shadow-2xl object-contain" />
-    <div id="lightboxCaption" class="mt-3 text-xs text-slate-300 font-medium"></div>
-  </div>
-
-  <!-- ===================================================================== -->
-  <!-- APPLICATION LOGIC (Dual-Engine Tunnel + Auto Gemini Vision AI)        -->
+  <!-- APPLICATION LOGIC (Dual-Engine Tunnel + Multi-Agent Socratic Tutor)   -->
   <!-- ===================================================================== -->
   <script>
     /*************************************************************************
-     * 1. IndexedDB Local Storage Helper
-     *************************************************************************/
-    const DB_NAME = 'QRPhotoDropDB';
-    const STORE_NAME = 'photos';
-    let dbInstance = null;
-
-    function openPhotoDB() {
-      return new Promise((resolve) => {
-        if (dbInstance) return resolve(dbInstance);
-        const req = indexedDB.open(DB_NAME, 1);
-        req.onupgradeneeded = (e) => {
-          const db = e.target.result;
-          if (!db.objectStoreNames.contains(STORE_NAME)) {
-            db.createObjectStore(STORE_NAME, { keyPath: 'id' });
-          }
-        };
-        req.onsuccess = (e) => {
-          dbInstance = e.target.result;
-          resolve(dbInstance);
-        };
-        req.onerror = () => resolve(null);
-      });
-    }
-
-    async function savePhotoToDB(photoObj) {
-      const db = await openPhotoDB();
-      if (!db) return;
-      return new Promise((resolve) => {
-        const tx = db.transaction(STORE_NAME, 'readwrite');
-        tx.objectStore(STORE_NAME).put(photoObj);
-        tx.oncomplete = () => resolve();
-        tx.onerror = () => resolve();
-      });
-    }
-
-    async function getAllPhotosFromDB() {
-      const db = await openPhotoDB();
-      if (!db) return [];
-      return new Promise((resolve) => {
-        const tx = db.transaction(STORE_NAME, 'readonly');
-        const req = tx.objectStore(STORE_NAME).getAll();
-        req.onsuccess = () => {
-          const list = req.result || [];
-          list.sort((a, b) => b.timestamp - a.timestamp);
-          resolve(list);
-        };
-        req.onerror = () => resolve([]);
-      });
-    }
-
-    async function deletePhotoFromDB(id) {
-      const db = await openPhotoDB();
-      if (!db) return;
-      return new Promise((resolve) => {
-        const tx = db.transaction(STORE_NAME, 'readwrite');
-        tx.objectStore(STORE_NAME).delete(id);
-        tx.oncomplete = () => resolve();
-      });
-    }
-
-    async function clearAllPhotosFromDB() {
-      const db = await openPhotoDB();
-      if (!db) return;
-      return new Promise((resolve) => {
-        const tx = db.transaction(STORE_NAME, 'readwrite');
-        tx.objectStore(STORE_NAME).clear();
-        tx.oncomplete = () => resolve();
-      });
-    }
-
-    /*************************************************************************
-     * 2. Gemini AI Vision Object Identification Engine
+     * 1. Configuration & State
      *************************************************************************/
     const VALID_GEMINI_MODELS = ['gemini-3.8-flash', 'gemini-4-argon', 'gemini-3.1-pro-preview', 'gemini-3.5-flash-lite'];
     let geminiApiKey = localStorage.getItem('gemini_api_key') || '';
@@ -598,222 +476,16 @@
       geminiModel = 'gemini-3.8-flash';
       localStorage.setItem('gemini_model', geminiModel);
     }
-    let geminiLang = localStorage.getItem('gemini_lang') || 'Bilingual (English & Traditional Chinese 繁體中文)';
-    let currentSpotlightPhotoId = null;
+    let geminiLang = localStorage.getItem('gemini_lang') || 'English';
+    let aiMode = localStorage.getItem('qr_ai_mode') || 'math_tutor';
 
-    function initGeminiSettingsUI() {
-      const keyInput = document.getElementById('geminiApiKeyInput');
-      const modelSelect = document.getElementById('geminiModelSelect');
-      const langSelect = document.getElementById('geminiLangSelect');
-      const badge = document.getElementById('apiKeyStatusBadge');
+    // Conversation state for Socratic tutoring
+    let chatHistory = []; // [{ role: 'user' | 'model', text: string, imageDataUrl?: string }]
+    let solverVerificationNotes = '';
+    let pendingImageDataUrl = null;
+    let isAiThinking = false;
+    let lastMobileReplyFn = null;
 
-      keyInput.value = geminiApiKey;
-      modelSelect.value = geminiModel;
-      langSelect.value = geminiLang;
-
-      const updateKeyBadge = () => {
-        if (geminiApiKey && geminiApiKey.length > 15) {
-          badge.className = 'px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30';
-          badge.textContent = '✓ AI Ready';
-        } else {
-          badge.className = 'px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-500/15 text-amber-300 border border-amber-500/30';
-          badge.textContent = 'API Key Needed';
-        }
-      };
-      updateKeyBadge();
-
-      keyInput.addEventListener('input', (e) => {
-        geminiApiKey = e.target.value.trim();
-        localStorage.setItem('gemini_api_key', geminiApiKey);
-        updateKeyBadge();
-        // If there are photos waiting for analysis, analyze the latest one automatically!
-        if (geminiApiKey.length > 20) {
-          const unanalyzed = Array.from(photosState.values())
-            .sort((a, b) => b.timestamp - a.timestamp)
-            .find((p) => !p.aiObjectTitle || p.aiStatus === 'needs_key');
-          if (unanalyzed) {
-            identifyPhotoWithGemini(unanalyzed);
-          }
-        }
-      });
-
-      modelSelect.addEventListener('change', (e) => {
-        geminiModel = e.target.value;
-        localStorage.setItem('gemini_model', geminiModel);
-      });
-
-      langSelect.addEventListener('change', (e) => {
-        geminiLang = e.target.value;
-        localStorage.setItem('gemini_lang', geminiLang);
-      });
-
-      document.getElementById('toggleApiKeyBtn').addEventListener('click', () => {
-        keyInput.type = keyInput.type === 'password' ? 'text' : 'password';
-      });
-
-      document.getElementById('reAnalyzeSpotlightBtn').addEventListener('click', () => {
-        if (currentSpotlightPhotoId && photosState.has(currentSpotlightPhotoId)) {
-          identifyPhotoWithGemini(photosState.get(currentSpotlightPhotoId));
-        }
-      });
-    }
-
-    async function identifyPhotoWithGemini(photo, sendBackToPhoneFn = null) {
-      currentSpotlightPhotoId = photo.id;
-      const spotlightCard = document.getElementById('aiSpotlightCard');
-      const spotlightPill = document.getElementById('spotlightStatusPill');
-      const spotlightImg = document.getElementById('spotlightImg');
-      const spotlightName = document.getElementById('spotlightObjectName');
-      const spotlightCatRow = document.getElementById('spotlightCategoryRow');
-      const spotlightCatBadge = document.getElementById('spotlightCategoryBadge');
-      const spotlightDesc = document.getElementById('spotlightDescription');
-
-      spotlightCard.classList.remove('hidden');
-      spotlightImg.src = photo.dataUrl;
-
-      if (!geminiApiKey || geminiApiKey.length < 15) {
-        photo.aiStatus = 'needs_key';
-        photo.aiObjectTitle = '🔑 Enter Gemini API Key to identify';
-        photo.aiObjectDesc = 'Paste your free Gemini API Key in the top-left box and Gemini will automatically identify this object.';
-        spotlightPill.className = 'px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/30';
-        spotlightPill.textContent = 'API Key Required';
-        spotlightName.textContent = '🔑 Please enter your Gemini API Key on the left';
-        spotlightDesc.textContent = 'Once you paste your Gemini API Key, this photo will be analyzed automatically.';
-        renderPhotoGallery();
-        document.getElementById('geminiApiKeyInput').focus();
-        return;
-      }
-
-      // Show loading state
-      photo.aiStatus = 'analyzing';
-      photo.aiObjectTitle = '✨ Identifying object...';
-      photo.aiObjectDesc = 'Gemini Vision AI is inspecting the photo...';
-      spotlightPill.className = 'px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 animate-pulse';
-      spotlightPill.textContent = '✨ Analyzing with Gemini...';
-      spotlightName.textContent = 'Inspecting photo...';
-      spotlightCatRow.classList.add('hidden');
-      spotlightDesc.textContent = 'Sending image to Google Gemini Vision API...';
-      renderPhotoGallery();
-
-      try {
-        const base64Data = photo.dataUrl.split(',')[1];
-        const mimeType = photo.dataUrl.match(/^data:(image\/[a-zA-Z0-9+.-]+);base64,/)?.[1] || 'image/jpeg';
-
-        const promptText = `Look at this uploaded photo and identify the main object(s) in it.
-Respond in ${geminiLang}.
-Return ONLY a valid JSON object with the following keys:
-{
-  "objectName": "Short, clear name of the main object (e.g., 'Stainless Steel Insulated Water Bottle / 不鏽鋼保溫瓶')",
-  "category": "Object category & brand/model if recognizable (e.g., 'Drinkware / Electronics / Plant / Document')",
-  "details": "2 to 4 concise bullet points describing what the object is, its visible traits/material/color, any readable text/brand on it, and its primary use."
-}`;
-
-        // Try selected model first, supporting both standard Gemini API and AQ. (Vertex AI Express / Google GenAI) keys!
-        const candidateModels = [geminiModel, 'gemini-3.8-flash', 'gemini-3.5-flash-lite', 'gemini-4-argon'].filter((v, i, a) => a.indexOf(v) === i);
-        const isAqKey = geminiApiKey.startsWith('AQ.');
-        let responseJson = null;
-        let lastErr = null;
-
-        for (const modelName of candidateModels) {
-          const endpoints = isAqKey
-            ? [
-                `https://aiplatform.googleapis.com/v1/publishers/google/models/${modelName}:generateContent?key=${encodeURIComponent(geminiApiKey)}`,
-                `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${encodeURIComponent(geminiApiKey)}`
-              ]
-            : [
-                `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${encodeURIComponent(geminiApiKey)}`,
-                `https://aiplatform.googleapis.com/v1/publishers/google/models/${modelName}:generateContent?key=${encodeURIComponent(geminiApiKey)}`
-              ];
-
-          for (const url of endpoints) {
-            const res = await fetch(url, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                contents: [{
-                  role: 'user',
-                  parts: [
-                    { text: promptText },
-                    { inline_data: { mime_type: mimeType, data: base64Data } }
-                  ]
-                }],
-                generationConfig: {
-                  temperature: 0.2,
-                  responseMimeType: 'application/json'
-                }
-              })
-            });
-
-            if (res.ok) {
-              responseJson = await res.json();
-              break;
-            } else {
-              const errBody = await res.json().catch(() => ({}));
-              lastErr = new Error(errBody.error?.message || `HTTP ${res.status}`);
-            }
-          }
-          if (responseJson) break;
-        }
-
-        if (!responseJson) {
-          throw lastErr || new Error('Failed to reach Gemini API');
-        }
-
-        const rawText = responseJson.candidates?.[0]?.content?.parts?.[0]?.text || '{}';
-        let parsed = {};
-        try {
-          parsed = JSON.parse(rawText.replace(/^```json\s*|\s*```$/g, '').trim());
-        } catch (_) {
-          parsed = { objectName: 'Identified Object', category: 'Vision Result', details: rawText };
-        }
-
-        const detailsText = Array.isArray(parsed.details) ? parsed.details.join('\n') : (parsed.details || rawText);
-
-        photo.aiStatus = 'done';
-        photo.aiObjectTitle = parsed.objectName || 'Object Identified';
-        photo.aiCategory = parsed.category || '';
-        photo.aiObjectDesc = detailsText;
-        await savePhotoToDB(photo);
-
-        // Update Spotlight UI
-        spotlightPill.className = 'px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30';
-        spotlightPill.textContent = '✓ Identified';
-        spotlightName.textContent = photo.aiObjectTitle;
-        if (photo.aiCategory) {
-          spotlightCatBadge.textContent = `🏷️ ${photo.aiCategory}`;
-          spotlightCatRow.classList.remove('hidden');
-        }
-        spotlightDesc.textContent = photo.aiObjectDesc;
-        renderPhotoGallery();
-
-        // Also broadcast AI result back to the phone so the user sees it on their phone too!
-        const aiReplyPacket = {
-          type: 'ai_result',
-          transferId: photo.id,
-          objectName: photo.aiObjectTitle,
-          category: photo.aiCategory,
-          details: photo.aiObjectDesc
-        };
-        if (sendBackToPhoneFn) sendBackToPhoneFn(aiReplyPacket);
-        if (pcMqtt && pcMqtt.connected) {
-          pcMqtt.publish(`qrdrop/${activeRoomId}/to_mobile`, JSON.stringify(aiReplyPacket), { qos: 0 });
-        }
-      } catch (err) {
-        console.error('Gemini Vision error:', err);
-        photo.aiStatus = 'error';
-        photo.aiObjectTitle = '⚠️ Gemini Analysis Error';
-        photo.aiObjectDesc = err.message || 'Check your Gemini API Key and try again.';
-        spotlightPill.className = 'px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-rose-500/20 text-rose-300 border border-rose-500/30';
-        spotlightPill.textContent = 'Error';
-        spotlightName.textContent = 'Could not analyze photo';
-        spotlightDesc.textContent = photo.aiObjectDesc;
-        renderPhotoGallery();
-      }
-    }
-
-    /*************************************************************************
-     * 3. Shared Utilities & Image Compression
-     *************************************************************************/
     const ICE_SERVERS = [
       { urls: 'stun:stun.l.google.com:19302' },
       { urls: 'stun:stun1.l.google.com:19302' },
@@ -846,6 +518,267 @@ Return ONLY a valid JSON object with the following keys:
       return out;
     }
 
+    let activeRoomId = localStorage.getItem('qr_photo_drop_room_id') || generateShortId(8);
+    localStorage.setItem('qr_photo_drop_room_id', activeRoomId);
+    const receivedTransferIds = new Set();
+
+    /*************************************************************************
+     * 2. Markdown + KaTeX Math Rendering Helper
+     *************************************************************************/
+    function renderMathAndMarkdown(element, markdownText) {
+      if (!element) return;
+      // Protect LaTeX blocks before Marked parses markdown
+      const mathBlocks = [];
+      let protectedText = (markdownText || '').replace(/(\$\$[\s\S]+?\$\$|\\\[[\s\S]+?\\\]|\$[^\$\n]+?\$|\\\([\s\S]+?\\\))/g, (match) => {
+        const idx = mathBlocks.length;
+        mathBlocks.push(match);
+        return `@@MATH_BLOCK_${idx}@@`;
+      });
+
+      let html = marked.parse(protectedText);
+      html = html.replace(/@@MATH_BLOCK_(\d+)@@/g, (_, idx) => mathBlocks[Number(idx)]);
+      element.innerHTML = html;
+
+      if (window.renderMathInElement) {
+        renderMathInElement(element, {
+          delimiters: [
+            { left: '$$', right: '$$', display: true },
+            { left: '\\[', right: '\\]', display: true },
+            { left: '$', right: '$', display: false },
+            { left: '\\(', right: '\\)', display: false }
+          ],
+          throwOnError: false
+        });
+      }
+    }
+
+    /*************************************************************************
+     * 3. Gemini API Call Helper (Supports both AQ. and AIzaSy... keys)
+     *************************************************************************/
+    async function callGeminiAPI(contents, systemInstruction, temperature = 0.25) {
+      if (!geminiApiKey || geminiApiKey.length < 15) {
+        document.getElementById('geminiApiKeyInput').focus();
+        throw new Error('Please paste your Gemini API Key in the top-left settings box first.');
+      }
+
+      const candidateModels = [geminiModel, 'gemini-3.8-flash', 'gemini-3.5-flash-lite', 'gemini-4-argon'].filter((v, i, a) => a.indexOf(v) === i);
+      const isAqKey = geminiApiKey.startsWith('AQ.');
+      let lastErr = null;
+
+      for (const modelName of candidateModels) {
+        const endpoints = isAqKey
+          ? [
+              `https://aiplatform.googleapis.com/v1/publishers/google/models/${modelName}:generateContent?key=${encodeURIComponent(geminiApiKey)}`,
+              `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${encodeURIComponent(geminiApiKey)}`
+            ]
+          : [
+              `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${encodeURIComponent(geminiApiKey)}`,
+              `https://aiplatform.googleapis.com/v1/publishers/google/models/${modelName}:generateContent?key=${encodeURIComponent(geminiApiKey)}`
+            ];
+
+        for (const url of endpoints) {
+          const payload = {
+            contents,
+            generationConfig: { temperature }
+          };
+          if (systemInstruction) {
+            payload.system_instruction = { parts: [{ text: systemInstruction }] };
+          }
+
+          const res = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+
+          if (res.ok) {
+            const data = await res.json();
+            return data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+          } else {
+            const errBody = await res.json().catch(() => ({}));
+            lastErr = new Error(errBody.error?.message || `HTTP ${res.status}`);
+          }
+        }
+      }
+      throw lastErr || new Error('Failed to reach Gemini API');
+    }
+
+    /*************************************************************************
+     * 4. Socratic Math Tutor Multi-Step Engine (Solver -> Socratic Coach)
+     *************************************************************************/
+    async function runSocraticTutorTurn(userText, attachedImageUrl = null) {
+      if (isAiThinking) return;
+      isAiThinking = true;
+
+      const welcomeEl = document.getElementById('tutorWelcomeState');
+      if (welcomeEl) welcomeEl.classList.add('hidden');
+      document.getElementById('quickPromptsBar').classList.remove('hidden');
+
+      // Append User Bubble to UI & History
+      appendChatBubble('user', userText || (attachedImageUrl ? 'Please help me solve this problem step by step!' : ''), attachedImageUrl);
+
+      chatHistory.push({
+        role: 'user',
+        text: userText || (attachedImageUrl ? 'Here is the photo. Please guide me through solving it step by step without giving away the final answer.' : ''),
+        imageDataUrl: attachedImageUrl
+      });
+
+      const thinkingBubbleContent = appendChatBubble('model', '✨ *Thinking and preparing your next guiding step...*');
+
+      try {
+        if (aiMode === 'object_id' && attachedImageUrl) {
+          // Object Identification Mode
+          const base64Data = attachedImageUrl.split(',')[1];
+          const mimeType = attachedImageUrl.match(/^data:(image\/[a-zA-Z0-9+.-]+);base64,/)?.[1] || 'image/jpeg';
+          const objReply = await callGeminiAPI([
+            {
+              role: 'user',
+              parts: [
+                { text: `Identify the main object(s) in this photo in ${geminiLang}. State the object name, category, and 3 key details.` },
+                { inline_data: { mime_type: mimeType, data: base64Data } }
+              ]
+            }
+          ]);
+          renderMathAndMarkdown(thinkingBubbleContent, objReply);
+          chatHistory.push({ role: 'model', text: objReply });
+          broadcastTutorReplyToMobile(objReply);
+          isAiThinking = false;
+          return;
+        }
+
+        // STEP A: If this is the FIRST image of a problem (no solver notes yet), run the hidden Expert Solver Agent first
+        // so the Socratic Tutor has a 100% accurate roadmap of the solution steps!
+        if (attachedImageUrl && !solverVerificationNotes) {
+          thinkingBubbleContent.innerHTML = '🧠 *Step 1/2: Reading problem & verifying math steps internally...*';
+          const base64Data = attachedImageUrl.split(',')[1];
+          const mimeType = attachedImageUrl.match(/^data:(image\/[a-zA-Z0-9+.-]+);base64,/)?.[1] || 'image/jpeg';
+
+          const solverPrompt = `You are an expert Math Solver verifying a math problem behind the scenes for a Socratic Tutor.
+1. Transcribe the exact problem statement and all given conditions from the image.
+2. Solve the problem carefully step-by-step (Step 1, Step 2, Step 3...) and verify the final answer so there are no calculation mistakes.
+Respond in ${geminiLang} using clear LaTeX ($...$ for inline math, $$...$$ for display math).`;
+
+          solverVerificationNotes = await callGeminiAPI(
+            [{
+              role: 'user',
+              parts: [
+                { text: solverPrompt },
+                { inline_data: { mime_type: mimeType, data: base64Data } }
+              ]
+            }],
+            null,
+            0.1
+          );
+
+          // Populate the hidden scratchpad drawer (so user can peek only if they want to)
+          const toggleBtn = document.getElementById('toggleSolverNotesBtn');
+          toggleBtn.classList.remove('hidden');
+          renderMathAndMarkdown(document.getElementById('solverScratchpadContent'), solverVerificationNotes);
+        }
+
+        // STEP B: Socratic Tutor Agent (Strictly guides the student one step at a time, NEVER reveals the final answer!)
+        thinkingBubbleContent.innerHTML = '🎓 *Formulating your guiding question...*';
+
+        const socraticSystemPrompt = `You are a warm, encouraging, Socratic Math Tutor (蘇格拉底式數學引導家教).
+Language to use: ${geminiLang}.
+
+STRICT SOCRATIC RULES (CRITICAL — MUST FOLLOW WITHOUT EXCEPTION):
+1. NEVER give the student the final answer or dump the full solution all at once!
+2. Break the problem into small, manageable steps.
+3. On the first turn when a math problem is uploaded:
+   - Briefly state what the problem is asking and list the known information clearly (using $...$ LaTeX for math).
+   - Point out the key concept or strategy needed for Step 1.
+   - Ask the student ONE specific, small guiding question to help them figure out Step 1 on their own.
+4. When the student replies (by text or by uploading a photo of their handwritten work):
+   - If they uploaded handwritten work or gave an answer for the current step, carefully check their work!
+   - Praise what they did right. If there is a mistake, gently point out where the slip-up happened and give a small hint so they can fix it.
+   - Once they get the current step right, confirm that intermediate result and ask ONE guiding question for the NEXT step.
+   - Only confirm the final answer AFTER the student reaches the final step themselves.
+5. Keep each response concise, friendly, and easy to read. Always ask ONLY ONE question at the end of your turn.
+
+${solverVerificationNotes ? `\n--- HIDDEN REFERENCE SOLUTION (FOR YOUR EYES ONLY — DO NOT REVEAL THIS DIRECTLY TO THE STUDENT!) ---\n${solverVerificationNotes}\n------------------------------------------------------------------------------------------------` : ''}`;
+
+        const geminiContents = chatHistory.map((turn) => {
+          const parts = [];
+          if (turn.text) parts.push({ text: turn.text });
+          if (turn.imageDataUrl) {
+            const b64 = turn.imageDataUrl.split(',')[1];
+            const mime = turn.imageDataUrl.match(/^data:(image\/[a-zA-Z0-9+.-]+);base64,/)?.[1] || 'image/jpeg';
+            parts.push({ inline_data: { mime_type: mime, data: b64 } });
+          }
+          return {
+            role: turn.role === 'model' ? 'model' : 'user',
+            parts
+          };
+        });
+
+        const tutorReply = await callGeminiAPI(geminiContents, socraticSystemPrompt, 0.3);
+        renderMathAndMarkdown(thinkingBubbleContent, tutorReply);
+        chatHistory.push({ role: 'model', text: tutorReply });
+        broadcastTutorReplyToMobile(tutorReply);
+      } catch (err) {
+        console.error('Socratic Tutor Error:', err);
+        thinkingBubbleContent.innerHTML = `<span class="text-rose-400 font-semibold">⚠️ ${err.message}</span>`;
+      } finally {
+        isAiThinking = false;
+        const container = document.getElementById('tutorChatContainer');
+        container.scrollTop = container.scrollHeight;
+      }
+    }
+
+    function appendChatBubble(role, markdownText, imageDataUrl = null) {
+      const container = document.getElementById('tutorChatContainer');
+      const wrapper = document.createElement('div');
+
+      if (role === 'user') {
+        wrapper.className = 'flex justify-end';
+        const bubble = document.createElement('div');
+        bubble.className = 'max-w-[82%] rounded-2xl rounded-tr-sm bg-indigo-600/90 text-white p-4 shadow-lg space-y-2.5';
+        if (imageDataUrl) {
+          const img = document.createElement('img');
+          img.src = imageDataUrl;
+          img.className = 'max-h-56 rounded-xl border border-white/20 object-contain bg-slate-950';
+          bubble.appendChild(img);
+        }
+        const textDiv = document.createElement('div');
+        textDiv.className = 'text-sm math-prose';
+        renderMathAndMarkdown(textDiv, markdownText);
+        bubble.appendChild(textDiv);
+        wrapper.appendChild(bubble);
+        container.appendChild(wrapper);
+        container.scrollTop = container.scrollHeight;
+        return textDiv;
+      } else {
+        wrapper.className = 'flex justify-start items-start gap-3';
+        wrapper.innerHTML = `
+          <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-sm shrink-0 mt-0.5 shadow">
+            🎓
+          </div>
+        `;
+        const bubble = document.createElement('div');
+        bubble.className = 'max-w-[85%] rounded-2xl rounded-tl-sm bg-slate-900/95 border border-slate-700/80 text-slate-100 p-4 shadow-xl text-sm math-prose';
+        renderMathAndMarkdown(bubble, markdownText);
+        wrapper.appendChild(bubble);
+        container.appendChild(wrapper);
+        container.scrollTop = container.scrollHeight;
+        return bubble;
+      }
+    }
+
+    function broadcastTutorReplyToMobile(replyText) {
+      const cleanPreview = replyText.replace(/\$\$/g, '').replace(/\$/g, '');
+      const packet = { type: 'ai_result', details: cleanPreview };
+      if (lastMobileReplyFn) {
+        try { lastMobileReplyFn(packet); } catch (_) {}
+      }
+      if (pcMqtt && pcMqtt.connected) {
+        pcMqtt.publish(`qrdrop/${activeRoomId}/to_mobile`, JSON.stringify(packet), { qos: 0 });
+      }
+    }
+
+    /*************************************************************************
+     * 5. Image Compression & Cropper Flow
+     *************************************************************************/
     function compressImageFile(file, maxDimension = 1600, quality = 0.85) {
       return new Promise((resolve, reject) => {
         const reader = new FileReader();
@@ -867,12 +800,11 @@ Return ONLY a valid JSON object with the following keys:
             canvas.height = height;
             const ctx = canvas.getContext('2d');
             ctx.drawImage(img, 0, 0, width, height);
-            const dataUrl = canvas.toDataURL('image/jpeg', quality);
             resolve({
-              dataUrl,
+              dataUrl: canvas.toDataURL('image/jpeg', quality),
               width,
               height,
-              name: file.name || `photo-${Date.now()}.jpg`
+              name: file.name || `math-${Date.now()}.jpg`
             });
           };
           img.onerror = reject;
@@ -883,72 +815,212 @@ Return ONLY a valid JSON object with the following keys:
       });
     }
 
-    /*************************************************************************
-     * 4. Route Detection (#remote=ROOM_ID or #receive=ROOM_ID&photo=PHOTO_ID)
-     *************************************************************************/
-    const photosState = new Map();
-    const receivedTransferIds = new Set();
-    let activeRoomId = localStorage.getItem('qr_photo_drop_room_id') || generateShortId(8);
-    localStorage.setItem('qr_photo_drop_room_id', activeRoomId);
+    let activeCropper = null;
 
-    function parseHashParams() {
-      const rawHash = window.location.hash.replace(/^#/, '');
-      return new URLSearchParams(rawHash);
+    function openCropModalWithImage(dataUrl) {
+      const modal = document.getElementById('cropModal');
+      const imgEl = document.getElementById('cropImageTarget');
+      modal.classList.remove('hidden');
+
+      if (activeCropper) {
+        activeCropper.destroy();
+        activeCropper = null;
+      }
+      imgEl.onload = () => {
+        if (activeCropper) activeCropper.destroy();
+        activeCropper = new Cropper(imgEl, {
+          viewMode: 1,
+          autoCropArea: 0.92,
+          background: false,
+          responsive: true
+        });
+      };
+      imgEl.src = dataUrl;
     }
 
-    function initAppByRoute() {
-      const params = parseHashParams();
-      const remoteRoom = params.get('remote');
-      const receiveRoom = params.get('receive');
-      const photoId = params.get('photo');
-
-      if (remoteRoom) {
-        document.getElementById('desktopView').classList.add('hidden');
-        document.getElementById('mobileReceiveView').classList.add('hidden');
-        document.getElementById('mobileUploadView').classList.remove('hidden');
-        initMobileTransmitter(remoteRoom.trim());
-      } else if (receiveRoom && photoId) {
-        document.getElementById('desktopView').classList.add('hidden');
-        document.getElementById('mobileUploadView').classList.add('hidden');
-        document.getElementById('mobileReceiveView').classList.remove('hidden');
-        initMobileReceiver(receiveRoom.trim(), photoId.trim());
-      } else {
-        document.getElementById('mobileUploadView').classList.add('hidden');
-        document.getElementById('mobileReceiveView').classList.add('hidden');
-        document.getElementById('desktopView').classList.remove('hidden');
-        initGeminiSettingsUI();
-        initDesktopHub();
+    function closeCropModal() {
+      document.getElementById('cropModal').classList.add('hidden');
+      if (activeCropper) {
+        activeCropper.destroy();
+        activeCropper = null;
       }
     }
 
     /*************************************************************************
-     * 5. DESKTOP HUB MODE (Receives Photos + Auto-Runs Gemini Vision)
+     * 6. Desktop Hub & Dual-Engine Tunnel (WebRTC + MQTT WSS)
      *************************************************************************/
     let pcPeer = null;
     let pcMqtt = null;
     const incomingChunks = new Map();
 
-    async function initDesktopHub() {
-      const saved = await getAllPhotosFromDB();
-      saved.forEach((p) => photosState.set(p.id, p));
-      renderPhotoGallery();
-
-      // Show latest analyzed photo in spotlight if available
-      if (saved.length > 0 && saved[0].aiObjectTitle) {
-        const latest = saved[0];
-        currentSpotlightPhotoId = latest.id;
-        document.getElementById('aiSpotlightCard').classList.remove('hidden');
-        document.getElementById('spotlightImg').src = latest.dataUrl;
-        document.getElementById('spotlightStatusPill').textContent = '✓ Identified';
-        document.getElementById('spotlightObjectName').textContent = latest.aiObjectTitle;
-        if (latest.aiCategory) {
-          document.getElementById('spotlightCategoryBadge').textContent = `🏷️ ${latest.aiCategory}`;
-          document.getElementById('spotlightCategoryRow').classList.remove('hidden');
-        }
-        document.getElementById('spotlightDescription').textContent = latest.aiObjectDesc || '';
-      }
-
+    function initDesktopHub() {
+      initSettingsListeners();
       setupRoomConnection(activeRoomId);
+    }
+
+    function initSettingsListeners() {
+      const keyInput = document.getElementById('geminiApiKeyInput');
+      const modelSelect = document.getElementById('geminiModelSelect');
+      const langSelect = document.getElementById('geminiLangSelect');
+      const modeSelect = document.getElementById('aiModeSelect');
+      const badge = document.getElementById('apiKeyStatusBadge');
+
+      keyInput.value = geminiApiKey;
+      modelSelect.value = geminiModel;
+      langSelect.value = geminiLang;
+      modeSelect.value = aiMode;
+
+      const updateBadge = () => {
+        if (geminiApiKey && geminiApiKey.length > 15) {
+          badge.className = 'px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30';
+          badge.textContent = '✓ AI Ready';
+        } else {
+          badge.className = 'px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-500/15 text-amber-300 border border-amber-500/30';
+          badge.textContent = 'API Key Needed';
+        }
+      };
+      updateBadge();
+
+      keyInput.addEventListener('input', (e) => {
+        geminiApiKey = e.target.value.trim();
+        localStorage.setItem('gemini_api_key', geminiApiKey);
+        updateBadge();
+      });
+
+      modelSelect.addEventListener('change', (e) => {
+        geminiModel = e.target.value;
+        localStorage.setItem('gemini_model', geminiModel);
+      });
+
+      langSelect.addEventListener('change', (e) => {
+        geminiLang = e.target.value;
+        localStorage.setItem('gemini_lang', geminiLang);
+      });
+
+      modeSelect.addEventListener('change', (e) => {
+        aiMode = e.target.value;
+        localStorage.setItem('qr_ai_mode', aiMode);
+      });
+
+      document.getElementById('toggleApiKeyBtn').addEventListener('click', () => {
+        keyInput.type = keyInput.type === 'password' ? 'text' : 'password';
+      });
+
+      // Cropper buttons
+      document.getElementById('closeCropModalBtn').addEventListener('click', closeCropModal);
+      document.getElementById('cancelCropBtn').addEventListener('click', closeCropModal);
+      document.getElementById('rotateLeftBtn').addEventListener('click', () => activeCropper?.rotate(-90));
+      document.getElementById('rotateRightBtn').addEventListener('click', () => activeCropper?.rotate(90));
+      document.getElementById('resetCropBtn').addEventListener('click', () => activeCropper?.reset());
+
+      document.getElementById('confirmCropAndSendBtn').addEventListener('click', () => {
+        if (!activeCropper) return;
+        const canvas = activeCropper.getCroppedCanvas({ maxWidth: 1800, maxHeight: 1800, imageSmoothingQuality: 'high' });
+        const croppedDataUrl = canvas.toDataURL('image/jpeg', 0.88);
+        closeCropModal();
+        // Automatically launch Socratic Guided Tutoring with the cropped photo!
+        const promptMsg = chatHistory.length === 0
+          ? 'Please guide me through solving this math problem step by step (do not give me the final answer right away).'
+          : 'Here is a photo of my work / next question. Please check it and guide me to the next step!';
+        runSocraticTutorTurn(promptMsg, croppedDataUrl);
+      });
+
+      // Chat send & Enter key
+      const chatInput = document.getElementById('chatInput');
+      const handleSend = () => {
+        const text = chatInput.value.trim();
+        if (!text && !pendingImageDataUrl) return;
+        const imgToSend = pendingImageDataUrl;
+        chatInput.value = '';
+        pendingImageDataUrl = null;
+        document.getElementById('pendingAttachmentBar').classList.add('hidden');
+        runSocraticTutorTurn(text, imgToSend);
+      };
+
+      document.getElementById('sendChatBtn').addEventListener('click', handleSend);
+      chatInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+          e.preventDefault();
+          handleSend();
+        }
+      });
+
+      // Quick prompt buttons
+      document.getElementById('quickPromptsBar').addEventListener('click', (e) => {
+        const btn = e.target.closest('[data-quick]');
+        if (!btn) return;
+        runSocraticTutorTurn(btn.getAttribute('data-quick'), null);
+      });
+
+      // Toggle hidden AI solver verification notes
+      document.getElementById('toggleSolverNotesBtn').addEventListener('click', () => {
+        document.getElementById('solverScratchpadDrawer').classList.toggle('hidden');
+      });
+
+      // Reset / New Problem button
+      document.getElementById('newProblemBtn').addEventListener('click', () => {
+        chatHistory = [];
+        solverVerificationNotes = '';
+        pendingImageDataUrl = null;
+        document.getElementById('pendingAttachmentBar').classList.add('hidden');
+        document.getElementById('quickPromptsBar').classList.add('hidden');
+        document.getElementById('toggleSolverNotesBtn').classList.add('hidden');
+        document.getElementById('solverScratchpadDrawer').classList.add('hidden');
+        const container = document.getElementById('tutorChatContainer');
+        Array.from(container.children).forEach((ch) => {
+          if (ch.id !== 'tutorWelcomeState') ch.remove();
+        });
+        document.getElementById('tutorWelcomeState').classList.remove('hidden');
+      });
+
+      // PC File Input, Drag-and-Drop, and Paste
+      const handlePcFile = async (file) => {
+        if (!file || !file.type.startsWith('image/')) return;
+        const compressed = await compressImageFile(file, 1800, 0.88);
+        openCropModalWithImage(compressed.dataUrl);
+      };
+
+      document.getElementById('pcFileInput').addEventListener('change', (e) => {
+        if (e.target.files?.[0]) handlePcFile(e.target.files[0]);
+        e.target.value = '';
+      });
+
+      const dropZone = document.getElementById('pcDropZone');
+      dropZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropZone.classList.add('border-indigo-500', 'bg-indigo-500/10');
+      });
+      dropZone.addEventListener('dragleave', () => {
+        dropZone.classList.remove('border-indigo-500', 'bg-indigo-500/10');
+      });
+      dropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropZone.classList.remove('border-indigo-500', 'bg-indigo-500/10');
+        if (e.dataTransfer.files?.[0]) handlePcFile(e.dataTransfer.files[0]);
+      });
+
+      window.addEventListener('paste', (e) => {
+        if (e.clipboardData && e.clipboardData.files?.[0]) {
+          handlePcFile(e.clipboardData.files[0]);
+        }
+      });
+
+      // Room ID controls
+      document.getElementById('refreshRoomBtn').addEventListener('click', () => {
+        activeRoomId = generateShortId(8);
+        localStorage.setItem('qr_photo_drop_room_id', activeRoomId);
+        document.getElementById('connectedDevicesBanner').classList.add('hidden');
+        setupRoomConnection(activeRoomId);
+      });
+
+      document.getElementById('copyUploadLinkBtn').addEventListener('click', (e) => {
+        const url = `${window.location.origin}${window.location.pathname}#remote=${activeRoomId}`;
+        navigator.clipboard.writeText(url);
+        const btn = e.currentTarget;
+        const orig = btn.innerHTML;
+        btn.innerHTML = '<span>✓</span> Copied!';
+        setTimeout(() => (btn.innerHTML = orig), 1800);
+      });
     }
 
     function renderMainRoomQr(roomId) {
@@ -957,8 +1029,8 @@ Return ONLY a valid JSON object with the following keys:
       const uploadUrl = `${window.location.origin}${window.location.pathname}#remote=${roomId}`;
       new QRCode(qrBox, {
         text: uploadUrl,
-        width: 190,
-        height: 190,
+        width: 176,
+        height: 176,
         colorDark: '#0f172a',
         colorLight: '#ffffff',
         correctLevel: QRCode.CorrectLevel.M
@@ -974,40 +1046,30 @@ Return ONLY a valid JSON object with the following keys:
       } else if (state === 'connected') {
         badge.className = 'inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold bg-indigo-500/15 text-indigo-300 border border-indigo-500/30';
         badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-indigo-400 mr-2 animate-ping"></span><span>${text}</span>`;
-      } else {
-        badge.className = 'inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium bg-amber-500/10 text-amber-300 border border-amber-500/25';
-        badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-amber-400 mr-2 animate-pulse"></span><span>${text}</span>`;
       }
     }
 
     function setupRoomConnection(roomId) {
       renderMainRoomQr(roomId);
-      updatePcConnectionBadge('connecting', 'Connecting tunnel...');
-
       if (pcPeer) { try { pcPeer.destroy(); } catch (_) {} }
       if (pcMqtt) { try { pcMqtt.end(true); } catch (_) {} }
 
       let peerReady = false;
       let mqttReady = false;
-
-      const checkReadyStatus = () => {
-        if (peerReady || mqttReady) {
-          updatePcConnectionBadge('ready', 'Ready • Scan QR to connect');
-        }
+      const checkReady = () => {
+        if (peerReady || mqttReady) updatePcConnectionBadge('ready', 'Ready • Scan QR to connect');
       };
 
       // Engine A: PeerJS WebRTC
       try {
         pcPeer = new Peer(`qrdrop-${roomId}`, { config: { iceServers: ICE_SERVERS } });
-        pcPeer.on('open', () => {
-          peerReady = true;
-          checkReadyStatus();
-        });
+        pcPeer.on('open', () => { peerReady = true; checkReady(); });
         pcPeer.on('connection', (conn) => {
-          conn.on('open', () => showPhoneConnectedBanner());
-          conn.on('data', (msg) => {
-            handleIncomingHubMessage(msg, (reply) => conn.send(reply));
+          conn.on('open', () => {
+            document.getElementById('connectedDevicesBanner').classList.remove('hidden');
+            updatePcConnectionBadge('connected', '📱 Phone Connected!');
           });
+          conn.on('data', (msg) => handleIncomingHubMessage(msg, (reply) => conn.send(reply)));
         });
       } catch (_) {}
 
@@ -1023,7 +1085,7 @@ Return ONLY a valid JSON object with the following keys:
 
         pcMqtt.on('connect', () => {
           mqttReady = true;
-          checkReadyStatus();
+          checkReady();
           pcMqtt.subscribe(hubTopic, { qos: 0 });
         });
 
@@ -1039,48 +1101,26 @@ Return ONLY a valid JSON object with the following keys:
       } catch (_) {}
     }
 
-    function showPhoneConnectedBanner() {
-      document.getElementById('connectedDevicesBanner').classList.remove('hidden');
-      updatePcConnectionBadge('connected', '📱 Phone Connected!');
-    }
-
     function handleIncomingHubMessage(msg, sendReply) {
       if (!msg || !msg.type) return;
+      lastMobileReplyFn = sendReply;
 
       if (msg.type === 'hello') {
-        showPhoneConnectedBanner();
+        document.getElementById('connectedDevicesBanner').classList.remove('hidden');
+        updatePcConnectionBadge('connected', '📱 Phone Connected!');
         sendReply({ type: 'hello_ack', roomId: activeRoomId });
         return;
       }
 
-      if (msg.type === 'request_photo') {
-        const photo = photosState.get(msg.photoId);
-        if (!photo) {
-          sendReply({ type: 'photo_not_found', photoId: msg.photoId });
-          return;
-        }
-        sendChunkedPhoto(photo.dataUrl, photo.name, msg.photoId, sendReply);
-        return;
-      }
-
       if (msg.type === 'photo_chunk') {
-        showPhoneConnectedBanner();
-        const { transferId, index, total, chunk, name, width, height } = msg;
-        if (receivedTransferIds.has(transferId)) {
-          if (index === total - 1) sendReply({ type: 'transfer_ack', transferId });
-          return;
-        }
+        document.getElementById('connectedDevicesBanner').classList.remove('hidden');
+        updatePcConnectionBadge('connected', '📱 Phone Connected!');
+        const { transferId, index, total, chunk } = msg;
+        if (receivedTransferIds.has(transferId)) return;
 
         let entry = incomingChunks.get(transferId);
         if (!entry) {
-          entry = {
-            total,
-            receivedCount: 0,
-            parts: new Array(total),
-            name: name || `photo-${Date.now()}.jpg`,
-            width,
-            height
-          };
+          entry = { total, receivedCount: 0, parts: new Array(total) };
           incomingChunks.set(transferId, entry);
         }
 
@@ -1099,339 +1139,17 @@ Return ONLY a valid JSON object with the following keys:
           receivedTransferIds.add(transferId);
           incomingChunks.delete(transferId);
           const fullDataUrl = entry.parts.join('');
-          setTimeout(() => pBox.classList.add('hidden'), 600);
+          setTimeout(() => pBox.classList.add('hidden'), 500);
 
-          const newPhoto = {
-            id: transferId,
-            dataUrl: fullDataUrl,
-            name: entry.name,
-            width: entry.width,
-            height: entry.height,
-            source: '📱 From Phone',
-            timestamp: Date.now()
-          };
-
-          addPhotoToGallery(newPhoto).then(() => {
-            // Immediately trigger Gemini Object Identification!
-            identifyPhotoWithGemini(newPhoto, sendReply);
-          });
-
+          // Open Cropper Modal automatically on PC (just like in the YouTube video!)
+          openCropModalWithImage(fullDataUrl);
           sendReply({ type: 'transfer_ack', transferId });
         }
       }
     }
 
-    function sendChunkedPhoto(dataUrl, name, transferId, sendFn) {
-      const CHUNK_SIZE = 48000;
-      const total = Math.ceil(dataUrl.length / CHUNK_SIZE);
-      for (let i = 0; i < total; i++) {
-        const chunk = dataUrl.slice(i * CHUNK_SIZE, (i + 1) * CHUNK_SIZE);
-        sendFn({
-          type: 'photo_chunk',
-          transferId,
-          index: i,
-          total,
-          chunk,
-          name
-        });
-      }
-    }
-
     /*************************************************************************
-     * 6. GALLERY MANAGEMENT, CROP, & INDIVIDUAL QR SHARE
-     *************************************************************************/
-    async function addPhotoToGallery(photoObj) {
-      photosState.set(photoObj.id, photoObj);
-      await savePhotoToDB(photoObj);
-      renderPhotoGallery();
-    }
-
-    function renderPhotoGallery() {
-      const list = Array.from(photosState.values()).sort((a, b) => b.timestamp - a.timestamp);
-      const countBadge = document.getElementById('photoCountBadge');
-      const emptyState = document.getElementById('emptyGalleryState');
-      const grid = document.getElementById('photoGrid');
-      const dlAllBtn = document.getElementById('downloadAllBtn');
-      const clearAllBtn = document.getElementById('clearAllBtn');
-
-      countBadge.textContent = list.length;
-
-      if (list.length === 0) {
-        emptyState.classList.remove('hidden');
-        grid.classList.add('hidden');
-        dlAllBtn.classList.add('hidden');
-        dlAllBtn.classList.remove('inline-flex');
-        clearAllBtn.classList.add('hidden');
-        clearAllBtn.classList.remove('inline-flex');
-        return;
-      }
-
-      emptyState.classList.add('hidden');
-      grid.classList.remove('hidden');
-      dlAllBtn.classList.remove('hidden');
-      dlAllBtn.classList.add('inline-flex');
-      clearAllBtn.classList.remove('hidden');
-      clearAllBtn.classList.add('inline-flex');
-
-      grid.innerHTML = '';
-      list.forEach((photo) => {
-        const timeStr = new Date(photo.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-        const card = document.createElement('div');
-        card.className = 'group bg-slate-900/90 border border-slate-800 hover:border-indigo-500/50 rounded-2xl overflow-hidden flex flex-col shadow-lg transition';
-        card.innerHTML = `
-          <div class="relative aspect-[4/3] bg-slate-950 overflow-hidden cursor-pointer" data-action="view" data-id="${photo.id}">
-            <img src="${photo.dataUrl}" alt="${photo.name}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300" />
-            <div class="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-md text-[10px] font-semibold bg-slate-950/75 text-slate-200 backdrop-blur-sm border border-white/10">
-              ${photo.source || '📸 Photo'}
-            </div>
-            <button data-action="delete" data-id="${photo.id}" title="Delete photo" class="absolute top-2.5 right-2.5 w-7 h-7 rounded-lg bg-slate-950/75 hover:bg-rose-600 text-slate-300 hover:text-white flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition">
-              ✕
-            </button>
-          </div>
-          <div class="p-4 flex-1 flex flex-col justify-between space-y-3">
-            <div>
-              <div class="flex items-center justify-between text-xs mb-1.5">
-                <span class="font-bold text-sm text-indigo-300 truncate" title="${photo.aiObjectTitle || photo.name}">
-                  ${photo.aiObjectTitle || '✨ Ready to identify'}
-                </span>
-                <span class="text-[11px] text-slate-500 shrink-0 ml-2">${timeStr}</span>
-              </div>
-              ${photo.aiCategory ? `<div class="text-[11px] text-purple-300 font-medium mb-1">🏷️ ${photo.aiCategory}</div>` : ''}
-              <p class="text-xs text-slate-300 line-clamp-3 whitespace-pre-line leading-relaxed bg-slate-950/60 p-2.5 rounded-xl border border-slate-800/80">
-                ${photo.aiObjectDesc || 'Click "✨ Identify" to analyze this photo with Gemini AI.'}
-              </p>
-            </div>
-
-            <div class="grid grid-cols-4 gap-1.5 pt-1">
-              <button data-action="identify" data-id="${photo.id}" class="py-1.5 px-2 rounded-lg bg-purple-500/15 hover:bg-purple-500/25 text-purple-300 border border-purple-500/25 text-[11px] font-semibold flex items-center justify-center gap-1 transition">
-                <span>✨</span> AI ID
-              </button>
-              <button data-action="qr" data-id="${photo.id}" class="py-1.5 px-2 rounded-lg bg-indigo-500/15 hover:bg-indigo-500/25 text-indigo-300 border border-indigo-500/25 text-[11px] font-semibold flex items-center justify-center gap-1 transition">
-                <span>📲</span> QR
-              </button>
-              <button data-action="crop" data-id="${photo.id}" class="py-1.5 px-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-[11px] font-medium flex items-center justify-center gap-1 transition">
-                <span>✂️</span> Crop
-              </button>
-              <a href="${photo.dataUrl}" download="${photo.name}" class="py-1.5 px-2 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border border-emerald-500/25 text-[11px] font-semibold flex items-center justify-center gap-1 transition">
-                <span>💾</span> Save
-              </a>
-            </div>
-          </div>
-        `;
-        grid.appendChild(card);
-      });
-    }
-
-    document.getElementById('photoGrid').addEventListener('click', async (e) => {
-      const target = e.target.closest('[data-action]');
-      if (!target) return;
-      const action = target.getAttribute('data-action');
-      const id = target.getAttribute('data-id');
-      const photo = photosState.get(id);
-      if (!photo) return;
-
-      if (action === 'delete') {
-        e.stopPropagation();
-        photosState.delete(id);
-        await deletePhotoFromDB(id);
-        renderPhotoGallery();
-      } else if (action === 'view') {
-        openLightbox(photo);
-      } else if (action === 'identify') {
-        identifyPhotoWithGemini(photo);
-      } else if (action === 'qr') {
-        openSinglePhotoQrModal(photo);
-      } else if (action === 'crop') {
-        openCropModal(photo);
-      }
-    });
-
-    function openLightbox(photo) {
-      document.getElementById('lightboxImg').src = photo.dataUrl;
-      document.getElementById('lightboxCaption').textContent = photo.aiObjectTitle ? `${photo.aiObjectTitle} — ${photo.name}` : photo.name;
-      document.getElementById('lightboxModal').classList.remove('hidden');
-    }
-    document.getElementById('closeLightboxBtn').addEventListener('click', () => {
-      document.getElementById('lightboxModal').classList.add('hidden');
-    });
-    document.getElementById('lightboxModal').addEventListener('click', (e) => {
-      if (e.target.id === 'lightboxModal') {
-        document.getElementById('lightboxModal').classList.add('hidden');
-      }
-    });
-
-    // Individual Photo QR Share Modal
-    let currentShareUrl = '';
-    function openSinglePhotoQrModal(photo) {
-      const box = document.getElementById('singlePhotoQrContainer');
-      box.innerHTML = '';
-      currentShareUrl = `${window.location.origin}${window.location.pathname}#receive=${activeRoomId}&photo=${photo.id}`;
-      new QRCode(box, {
-        text: currentShareUrl,
-        width: 200,
-        height: 200,
-        colorDark: '#0f172a',
-        colorLight: '#ffffff',
-        correctLevel: QRCode.CorrectLevel.M
-      });
-      document.getElementById('shareModalThumb').src = photo.dataUrl;
-      document.getElementById('shareModalName').textContent = photo.aiObjectTitle || photo.name;
-      document.getElementById('shareQrModal').classList.remove('hidden');
-    }
-    document.getElementById('closeShareQrModalBtn').addEventListener('click', () => {
-      document.getElementById('shareQrModal').classList.add('hidden');
-    });
-    document.getElementById('copySinglePhotoLinkBtn').addEventListener('click', (e) => {
-      navigator.clipboard.writeText(currentShareUrl);
-      const btn = e.currentTarget;
-      btn.textContent = '✓ Copied!';
-      setTimeout(() => (btn.textContent = 'Copy Link'), 1800);
-    });
-
-    // Cropper Modal
-    let activeCropper = null;
-    let activeCropPhotoId = null;
-
-    function openCropModal(photo) {
-      activeCropPhotoId = photo.id;
-      const imgEl = document.getElementById('cropImageTarget');
-      document.getElementById('cropModal').classList.remove('hidden');
-      if (activeCropper) {
-        activeCropper.destroy();
-        activeCropper = null;
-      }
-      imgEl.onload = () => {
-        if (activeCropper) activeCropper.destroy();
-        activeCropper = new Cropper(imgEl, {
-          viewMode: 1,
-          autoCropArea: 0.92,
-          background: false,
-          responsive: true
-        });
-      };
-      imgEl.src = photo.dataUrl;
-    }
-
-    function closeCropModal() {
-      document.getElementById('cropModal').classList.add('hidden');
-      if (activeCropper) {
-        activeCropper.destroy();
-        activeCropper = null;
-      }
-    }
-
-    document.getElementById('closeCropModalBtn').addEventListener('click', closeCropModal);
-    document.getElementById('cancelCropBtn').addEventListener('click', closeCropModal);
-    document.getElementById('rotateLeftBtn').addEventListener('click', () => activeCropper?.rotate(-90));
-    document.getElementById('rotateRightBtn').addEventListener('click', () => activeCropper?.rotate(90));
-    document.getElementById('resetCropBtn').addEventListener('click', () => activeCropper?.reset());
-
-    document.getElementById('saveCropBtn').addEventListener('click', async () => {
-      if (!activeCropper || !activeCropPhotoId) return;
-      const photo = photosState.get(activeCropPhotoId);
-      if (!photo) return;
-      const canvas = activeCropper.getCroppedCanvas({ maxWidth: 2000, maxHeight: 2000, imageSmoothingQuality: 'high' });
-      photo.dataUrl = canvas.toDataURL('image/jpeg', 0.9);
-      photo.timestamp = Date.now();
-      await savePhotoToDB(photo);
-      renderPhotoGallery();
-      closeCropModal();
-      // Re-run Gemini on the newly cropped region!
-      identifyPhotoWithGemini(photo);
-    });
-
-    // PC File Input, Drag-and-Drop, and Clipboard Paste
-    async function handlePcFiles(fileList) {
-      const files = Array.from(fileList || []).filter((f) => f.type.startsWith('image/'));
-      for (const file of files) {
-        const compressed = await compressImageFile(file, 1800, 0.88);
-        const newPhoto = {
-          id: generateShortId(10),
-          dataUrl: compressed.dataUrl,
-          name: compressed.name,
-          width: compressed.width,
-          height: compressed.height,
-          source: '💻 From PC',
-          timestamp: Date.now()
-        };
-        await addPhotoToGallery(newPhoto);
-        identifyPhotoWithGemini(newPhoto);
-      }
-    }
-
-    document.getElementById('pcFileInput').addEventListener('change', (e) => {
-      handlePcFiles(e.target.files);
-      e.target.value = '';
-    });
-
-    const dropZone = document.getElementById('pcDropZone');
-    dropZone.addEventListener('dragover', (e) => {
-      e.preventDefault();
-      dropZone.classList.add('border-indigo-500', 'bg-indigo-500/10');
-    });
-    dropZone.addEventListener('dragleave', () => {
-      dropZone.classList.remove('border-indigo-500', 'bg-indigo-500/10');
-    });
-    dropZone.addEventListener('drop', (e) => {
-      e.preventDefault();
-      dropZone.classList.remove('border-indigo-500', 'bg-indigo-500/10');
-      handlePcFiles(e.dataTransfer.files);
-    });
-
-    window.addEventListener('paste', (e) => {
-      if (e.clipboardData && e.clipboardData.files.length > 0) {
-        handlePcFiles(e.clipboardData.files);
-      }
-    });
-
-    // Download All as ZIP
-    document.getElementById('downloadAllBtn').addEventListener('click', async () => {
-      if (photosState.size === 0) return;
-      const zip = new JSZip();
-      let idx = 1;
-      photosState.forEach((photo) => {
-        const base64Data = photo.dataUrl.split(',')[1];
-        const cleanName = photo.name.replace(/[^a-zA-Z0-9._-]/g, '_') || `photo_${idx}.jpg`;
-        zip.file(`${idx}_${cleanName}`, base64Data, { base64: true });
-        idx++;
-      });
-      const blob = await zip.generateAsync({ type: 'blob' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `qr-photos-${new Date().toISOString().slice(0, 10)}.zip`;
-      a.click();
-      URL.revokeObjectURL(url);
-    });
-
-    // Clear All Photos
-    document.getElementById('clearAllBtn').addEventListener('click', async () => {
-      if (!confirm('Clear all photos from this browser gallery?')) return;
-      photosState.clear();
-      await clearAllPhotosFromDB();
-      document.getElementById('aiSpotlightCard').classList.add('hidden');
-      renderPhotoGallery();
-    });
-
-    // Refresh Room ID & Copy Link
-    document.getElementById('refreshRoomBtn').addEventListener('click', () => {
-      activeRoomId = generateShortId(8);
-      localStorage.setItem('qr_photo_drop_room_id', activeRoomId);
-      document.getElementById('connectedDevicesBanner').classList.add('hidden');
-      setupRoomConnection(activeRoomId);
-    });
-
-    document.getElementById('copyUploadLinkBtn').addEventListener('click', (e) => {
-      const url = `${window.location.origin}${window.location.pathname}#remote=${activeRoomId}`;
-      navigator.clipboard.writeText(url);
-      const btn = e.currentTarget;
-      const orig = btn.innerHTML;
-      btn.innerHTML = '<span>✓</span> Copied!';
-      setTimeout(() => (btn.innerHTML = orig), 1800);
-    });
-
-    /*************************************************************************
-     * 7. MOBILE TRANSMITTER MODE (#remote=ROOM_ID)
+     * 7. Mobile Transmitter Mode (#remote=ROOM_ID)
      *************************************************************************/
     let mobilePeerConn = null;
     let mobileMqttClient = null;
@@ -1452,13 +1170,10 @@ Return ONLY a valid JSON object with the following keys:
         } else if (msg.type === 'ai_result') {
           const aiBox = document.getElementById('mobileAiResultBox');
           aiBox.classList.remove('hidden');
-          document.getElementById('mobileAiObjectTitle').textContent = msg.objectName || 'Object Identified';
-          document.getElementById('mobileAiObjectDesc').textContent =
-            (msg.category ? `[${msg.category}]\n` : '') + (msg.details || '');
+          document.getElementById('mobileAiObjectDesc').textContent = msg.details || '';
         }
       };
 
-      // 1. Connect via MQTT over WSS
       try {
         mobileMqttClient = mqtt.connect(MQTT_BROKER_URL, {
           clientId: `qrdrop_mob_${roomId}_${generateShortId(4)}`,
@@ -1477,13 +1192,10 @@ Return ONLY a valid JSON object with the following keys:
 
         mobileMqttClient.on('message', (topic, payload) => {
           if (topic !== toMobTopic) return;
-          try {
-            handleIncomingMobileMsg(JSON.parse(payload.toString()));
-          } catch (_) {}
+          try { handleIncomingMobileMsg(JSON.parse(payload.toString())); } catch (_) {}
         });
       } catch (_) {}
 
-      // 2. Also connect via PeerJS WebRTC in parallel
       try {
         const mPeer = new Peer({ config: { iceServers: ICE_SERVERS } });
         mPeer.on('open', () => {
@@ -1498,14 +1210,48 @@ Return ONLY a valid JSON object with the following keys:
       } catch (_) {}
 
       const handleMobileFileSelection = async (e) => {
-        const files = Array.from(e.target.files || []);
-        if (!files.length) return;
-        const maxDim = parseInt(document.getElementById('mobileQualitySelect').value, 10) || 1600;
+        const file = e.target.files?.[0];
+        if (!file) return;
+        const pBox = document.getElementById('mobileProgressBox');
+        const pText = document.getElementById('mobileProgressText');
+        const pPct = document.getElementById('mobileProgressPercent');
+        const pBar = document.getElementById('mobileProgressBar');
 
-        for (let idx = 0; idx < files.length; idx++) {
-          const file = files[idx];
-          await compressAndBeamPhotoFromMobile(file, maxDim, idx + 1, files.length);
+        pBox.classList.remove('hidden');
+        pText.textContent = 'Processing photo...';
+        pPct.textContent = '10%';
+        pBar.style.width = '10%';
+
+        const compressed = await compressImageFile(file, 1600, 0.85);
+        const transferId = generateShortId(10);
+        const CHUNK_SIZE = 44000;
+        const totalChunks = Math.ceil(compressed.dataUrl.length / CHUNK_SIZE);
+        const toPcTopic = `qrdrop/${targetHubRoomId}/to_pc`;
+
+        for (let i = 0; i < totalChunks; i++) {
+          const chunk = compressed.dataUrl.slice(i * CHUNK_SIZE, (i + 1) * CHUNK_SIZE);
+          const packet = {
+            type: 'photo_chunk',
+            transferId,
+            index: i,
+            total: totalChunks,
+            chunk,
+            name: compressed.name
+          };
+          if (mobilePeerConn && mobilePeerConn.open) mobilePeerConn.send(packet);
+          if (mobileMqttClient && mobileMqttClient.connected) {
+            mobileMqttClient.publish(toPcTopic, JSON.stringify(packet), { qos: 0 });
+          }
+          const pct = Math.min(95, Math.round(((i + 1) / totalChunks) * 95));
+          pText.textContent = 'Beaming to PC Tutor...';
+          pPct.textContent = `${pct}%`;
+          pBar.style.width = `${pct}%`;
+          await new Promise((r) => setTimeout(r, 18));
         }
+
+        pText.textContent = '✓ Sent to PC! Confirm crop on PC screen to start.';
+        pPct.textContent = '100%';
+        pBar.style.width = '100%';
         e.target.value = '';
       };
 
@@ -1518,142 +1264,20 @@ Return ONLY a valid JSON object with the following keys:
       });
     }
 
-    async function compressAndBeamPhotoFromMobile(file, maxDim, currentIdx, totalFiles) {
-      const pBox = document.getElementById('mobileProgressBox');
-      const pText = document.getElementById('mobileProgressText');
-      const pPct = document.getElementById('mobileProgressPercent');
-      const pBar = document.getElementById('mobileProgressBar');
+    function initAppByRoute() {
+      const rawHash = window.location.hash.replace(/^#/, '');
+      const params = new URLSearchParams(rawHash);
+      const remoteRoom = params.get('remote');
 
-      pBox.classList.remove('hidden');
-      pText.textContent = `Processing photo (${currentIdx}/${totalFiles})...`;
-      pPct.textContent = '10%';
-      pBar.style.width = '10%';
-
-      const compressed = await compressImageFile(file, maxDim, 0.85);
-      const transferId = generateShortId(10);
-      const CHUNK_SIZE = 44000;
-      const totalChunks = Math.ceil(compressed.dataUrl.length / CHUNK_SIZE);
-      const toPcTopic = `qrdrop/${targetHubRoomId}/to_pc`;
-
-      for (let i = 0; i < totalChunks; i++) {
-        const chunk = compressed.dataUrl.slice(i * CHUNK_SIZE, (i + 1) * CHUNK_SIZE);
-        const packet = {
-          type: 'photo_chunk',
-          transferId,
-          index: i,
-          total: totalChunks,
-          chunk,
-          name: compressed.name,
-          width: compressed.width,
-          height: compressed.height
-        };
-
-        if (mobilePeerConn && mobilePeerConn.open) {
-          mobilePeerConn.send(packet);
-        }
-        if (mobileMqttClient && mobileMqttClient.connected) {
-          mobileMqttClient.publish(toPcTopic, JSON.stringify(packet), { qos: 0 });
-        }
-
-        const pct = Math.min(95, Math.round(((i + 1) / totalChunks) * 95));
-        pText.textContent = `Beaming to PC (${currentIdx}/${totalFiles})...`;
-        pPct.textContent = `${pct}%`;
-        pBar.style.width = `${pct}%`;
-        await new Promise((r) => setTimeout(r, 18));
+      if (remoteRoom) {
+        document.getElementById('desktopView').classList.add('hidden');
+        document.getElementById('mobileUploadView').classList.remove('hidden');
+        initMobileTransmitter(remoteRoom.trim());
+      } else {
+        document.getElementById('mobileUploadView').classList.add('hidden');
+        document.getElementById('desktopView').classList.remove('hidden');
+        initDesktopHub();
       }
-
-      pText.textContent = `✓ Sent! Gemini AI is identifying object...`;
-      pPct.textContent = `100%`;
-      pBar.style.width = `100%`;
-
-      const aiBox = document.getElementById('mobileAiResultBox');
-      aiBox.classList.remove('hidden');
-      document.getElementById('mobileAiObjectTitle').textContent = '✨ Gemini is analyzing your photo...';
-      document.getElementById('mobileAiObjectDesc').textContent = 'Results will appear here and on your PC screen in ~2 seconds.';
-
-      const sentContainer = document.getElementById('mobileSentListContainer');
-      const sentList = document.getElementById('mobileSentList');
-      sentContainer.classList.remove('hidden');
-      const thumb = document.createElement('div');
-      thumb.className = 'relative aspect-square rounded-xl overflow-hidden border border-emerald-500/40';
-      thumb.innerHTML = `
-        <img src="${compressed.dataUrl}" class="w-full h-full object-cover" />
-        <span class="absolute bottom-1 right-1 bg-emerald-500 text-slate-950 text-[10px] font-bold px-1.5 py-0.5 rounded">✓</span>
-      `;
-      sentList.prepend(thumb);
-    }
-
-    /*************************************************************************
-     * 8. MOBILE RECEIVER MODE (#receive=ROOM_ID&photo=PHOTO_ID)
-     *************************************************************************/
-    function initMobileReceiver(roomId, photoId) {
-      const badge = document.getElementById('receiveStatusBadge');
-      const pBar = document.getElementById('receiveProgressBar');
-      const loadingBox = document.getElementById('receiveLoadingBox');
-      const card = document.getElementById('receivedPhotoCard');
-      const img = document.getElementById('receivedPhotoImg');
-      const dlBtn = document.getElementById('receivedPhotoDownloadBtn');
-
-      let parts = null;
-      let receivedCount = 0;
-      let done = false;
-
-      const onChunkMessage = (msg) => {
-        if (done || !msg) return;
-        if (msg.type === 'photo_not_found') {
-          document.getElementById('receiveLoadingText').textContent = 'Photo not found on sender PC.';
-          return;
-        }
-        if (msg.type === 'photo_chunk' && msg.transferId === photoId) {
-          if (!parts) parts = new Array(msg.total);
-          if (parts[msg.index] === undefined) {
-            parts[msg.index] = msg.chunk;
-            receivedCount++;
-          }
-          const pct = Math.round((receivedCount / msg.total) * 100);
-          pBar.style.width = `${pct}%`;
-          badge.textContent = `${pct}%`;
-
-          if (receivedCount === msg.total) {
-            done = true;
-            const fullUrl = parts.join('');
-            img.src = fullUrl;
-            dlBtn.href = fullUrl;
-            dlBtn.download = msg.name || `photo-${photoId}.jpg`;
-            loadingBox.classList.add('hidden');
-            card.classList.remove('hidden');
-            badge.className = 'px-2.5 py-1 rounded-full text-[11px] font-semibold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30';
-            badge.textContent = '✓ Ready';
-          }
-        }
-      };
-
-      const client = mqtt.connect(MQTT_BROKER_URL, {
-        clientId: `qrdrop_rcv_${roomId}_${generateShortId(4)}`,
-        clean: true
-      });
-      const toPcTopic = `qrdrop/${roomId}/to_pc`;
-      const toMobTopic = `qrdrop/${roomId}/to_mobile`;
-
-      client.on('connect', () => {
-        client.subscribe(toMobTopic, { qos: 0 }, () => {
-          client.publish(toPcTopic, JSON.stringify({ type: 'request_photo', photoId }), { qos: 0 });
-        });
-      });
-      client.on('message', (topic, payload) => {
-        if (topic === toMobTopic) {
-          try { onChunkMessage(JSON.parse(payload.toString())); } catch (_) {}
-        }
-      });
-
-      try {
-        const rPeer = new Peer({ config: { iceServers: ICE_SERVERS } });
-        rPeer.on('open', () => {
-          const conn = rPeer.connect(`qrdrop-${roomId}`, { reliable: true });
-          conn.on('open', () => conn.send({ type: 'request_photo', photoId }));
-          conn.on('data', onChunkMessage);
-        });
-      } catch (_) {}
     }
 
     window.addEventListener('hashchange', initAppByRoute);
