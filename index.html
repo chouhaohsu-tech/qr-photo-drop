@@ -266,11 +266,17 @@
             <input id="anyFileInput" type="file" multiple class="hidden" />
           </label>
 
-          <!-- Live File Transfer Progress Box -->
-          <div id="fileTransferProgressBox" class="hidden mt-4 p-4 rounded-xl bg-indigo-950/60 border border-indigo-500/40 space-y-2">
-            <div class="flex items-center justify-between text-xs font-semibold">
-              <span id="fileTransferLabel" class="text-indigo-200 truncate max-w-[70%]">Transferring file...</span>
-              <span id="fileTransferStats" class="text-emerald-300 font-mono">0%</span>
+          <!-- Live File Transfer Progress Box with STOP Button -->
+          <div id="fileTransferProgressBox" class="hidden mt-4 p-4 rounded-xl bg-indigo-950/60 border border-indigo-500/40 space-y-2.5">
+            <div class="flex items-center justify-between gap-2 text-xs font-semibold">
+              <span id="fileTransferLabel" class="text-indigo-200 truncate">Transferring file...</span>
+              <div class="flex items-center gap-3 shrink-0">
+                <span id="fileTransferStats" class="text-emerald-300 font-mono">0%</span>
+                <button id="stopFileTransferBtn" type="button" class="px-3 py-1 rounded-lg bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold shadow transition flex items-center gap-1">
+                  <span>🛑</span>
+                  <span>Stop</span>
+                </button>
+              </div>
             </div>
             <div class="w-full h-2.5 bg-slate-900 rounded-full overflow-hidden">
               <div id="fileTransferBar" class="h-full bg-gradient-to-r from-indigo-500 via-purple-500 to-emerald-400 transition-all duration-100" style="width: 0%"></div>
@@ -444,11 +450,16 @@
             </div>
           </div>
 
-          <!-- Transfer Progress & Status -->
-          <div id="mobileProgressBox" class="hidden p-4 rounded-xl bg-indigo-500/10 border border-indigo-500/30 space-y-2">
-            <div class="flex justify-between text-xs font-semibold text-indigo-300">
-              <span id="mobileProgressText">Sending...</span>
-              <span id="mobileProgressPercent">0%</span>
+          <!-- Transfer Progress & Status (Mobile / Remote View) with STOP Button -->
+          <div id="mobileProgressBox" class="hidden p-4 rounded-xl bg-indigo-500/10 border border-indigo-500/30 space-y-2.5">
+            <div class="flex items-center justify-between gap-2 text-xs font-semibold text-indigo-300">
+              <span id="mobileProgressText" class="truncate">Sending...</span>
+              <div class="flex items-center gap-2 shrink-0">
+                <span id="mobileProgressPercent" class="font-mono">0%</span>
+                <button id="stopMobileTransferBtn" type="button" class="px-2.5 py-1 rounded-lg bg-rose-600 hover:bg-rose-500 text-white text-[11px] font-bold transition">
+                  🛑 Stop
+                </button>
+              </div>
             </div>
             <div class="w-full h-2.5 bg-slate-900 rounded-full overflow-hidden">
               <div id="mobileProgressBar" class="h-full bg-gradient-to-r from-indigo-500 to-emerald-400 transition-all duration-150" style="width: 0%"></div>
@@ -616,6 +627,49 @@
     const knownRemotePeerIds = new Set();
     const incomingPhotos = new Map();
     const incomingFiles = new Map(); // fileId -> { name, size, mime, total, receivedCount, chunks: [], startTime }
+    const cancelledFileIds = new Set();
+    let cancelCurrentTransferFlag = false;
+    let currentActiveTransferFileId = null;
+
+    function stopActiveFileTransfer(notifyRemote = true) {
+      cancelCurrentTransferFlag = true;
+      if (currentActiveTransferFileId) {
+        cancelledFileIds.add(currentActiveTransferFileId);
+        incomingFiles.delete(currentActiveTransferFileId);
+      }
+      // Clear any in-progress incoming files too
+      for (const fid of incomingFiles.keys()) {
+        cancelledFileIds.add(fid);
+      }
+      incomingFiles.clear();
+
+      if (notifyRemote) {
+        const cancelPacket = {
+          type: 'file_cancel',
+          senderId: myPeerInstanceId,
+          fileId: currentActiveTransferFileId || 'all'
+        };
+        activeWebRtcPeers.forEach((c) => { if (c && c.open) c.send(cancelPacket); });
+        const roomTopic = `qrdrop/${targetHubRoomId || activeRoomId}/room_bus`;
+        if (pcMqtt && pcMqtt.connected) pcMqtt.publish(roomTopic, JSON.stringify(cancelPacket), { qos: 0 });
+        if (mobileMqttClient && mobileMqttClient.connected) mobileMqttClient.publish(roomTopic, JSON.stringify(cancelPacket), { qos: 0 });
+      }
+
+      const pBox = document.getElementById('fileTransferProgressBox');
+      if (pBox) {
+        document.getElementById('fileTransferLabel').textContent = '🛑 Transfer Stopped';
+        document.getElementById('fileTransferStats').textContent = 'Cancelled';
+        document.getElementById('fileTransferBar').style.width = '0%';
+        setTimeout(() => pBox.classList.add('hidden'), 1200);
+      }
+      const mBox = document.getElementById('mobileProgressBox');
+      if (mBox) {
+        document.getElementById('mobileProgressText').textContent = '🛑 Transfer Stopped';
+        document.getElementById('mobileProgressPercent').textContent = 'Cancelled';
+        document.getElementById('mobileProgressBar').style.width = '0%';
+        setTimeout(() => mBox.classList.add('hidden'), 1200);
+      }
+    }
 
     function arrayBufferToBase64(buffer) {
       let binary = '';
@@ -639,6 +693,8 @@
 
     async function sendUniversalFileToRoom(file, roomId, progressCallback = null) {
       const fileId = generateShortId(10);
+      currentActiveTransferFileId = fileId;
+      cancelCurrentTransferFlag = false;
       const roomTopic = `qrdrop/${roomId}/room_bus`;
       const startTime = performance.now();
 
@@ -653,7 +709,7 @@
         pBar.style.width = `0%`;
       }
 
-      // If WebRTC is still shaking hands with a discovered peerId, wait up to 600ms for direct P2P to open
+      // Ensure direct WebRTC is connected if remote peer is known
       let openRtcConns = Array.from(activeWebRtcPeers.values()).filter((c) => c && c.open);
       if (openRtcConns.length === 0 && knownRemotePeerIds.size > 0 && pcPeer && pcPeer.id) {
         for (const remPid of knownRemotePeerIds) {
@@ -661,8 +717,9 @@
             try { bindWebRtcConn(pcPeer.connect(remPid, { reliable: true })); } catch (_) {}
           }
         }
-        for (let wait = 0; wait < 12; wait++) {
-          await new Promise((r) => setTimeout(r, 50));
+        for (let wait = 0; wait < 10; wait++) {
+          if (cancelCurrentTransferFlag) return;
+          await new Promise((r) => setTimeout(r, 40));
           openRtcConns = Array.from(activeWebRtcPeers.values()).filter((c) => c && c.open);
           if (openRtcConns.length > 0) break;
         }
@@ -670,17 +727,20 @@
 
       if (openRtcConns.length > 0) {
         // ===================================================================
-        // ⚡ TURBO DIRECT WEBRTC BINARY STREAMING (256KB chunks, Zero Timer Delay!)
+        // ⚡ OPTIMAL 32KB SCTP WEBRTC STREAMING (Never exceeds 64KB SCTP frame limit!)
         // ===================================================================
-        const CHUNK_SIZE = 256 * 1024; // 256KB per chunk for maximum WebRTC throughput
+        const CHUNK_SIZE = 32 * 1024; // 32KB fits in a single SCTP frame without PeerJS fragmentation!
         const totalChunks = Math.max(1, Math.ceil(file.size / CHUNK_SIZE));
-        const fullBuffer = await file.arrayBuffer();
         let lastUiUpdate = 0;
 
         for (let index = 0; index < totalChunks; index++) {
+          if (cancelCurrentTransferFlag || cancelledFileIds.has(fileId)) return;
+
           const start = index * CHUNK_SIZE;
           const end = Math.min(file.size, start + CHUNK_SIZE);
-          const sliceBuffer = fullBuffer.slice(start, end);
+          const sliceBuffer = await file.slice(start, end).arrayBuffer();
+
+          if (cancelCurrentTransferFlag || cancelledFileIds.has(fileId)) return;
 
           const rtcPacket = {
             type: 'file_chunk_bin',
@@ -695,49 +755,45 @@
           };
 
           for (const conn of openRtcConns) {
-            // Native WebRTC backpressure control: only yield if send buffer exceeds 4MB
             const dc = conn.dataChannel || conn._dc;
-            if (dc && dc.bufferedAmount > 4 * 1024 * 1024) {
-              await new Promise((resolve) => {
-                const checkBuf = () => {
-                  if (!dc || dc.bufferedAmount < 1 * 1024 * 1024) resolve();
-                  else setTimeout(checkBuf, 5);
-                };
-                checkBuf();
-              });
+            // Keep SCTP buffer under 512KB so the browser never stalls or drops frames
+            while (dc && dc.bufferedAmount > 512 * 1024) {
+              if (cancelCurrentTransferFlag || cancelledFileIds.has(fileId)) return;
+              await new Promise((r) => setTimeout(r, 2));
             }
             conn.send(rtcPacket);
           }
 
           const now = performance.now();
-          if (now - lastUiUpdate > 60 || index === totalChunks - 1) {
+          if (now - lastUiUpdate > 80 || index === totalChunks - 1) {
             lastUiUpdate = now;
             const pct = Math.round(((index + 1) / totalChunks) * 100);
             const elapsedSec = Math.max(0.05, (now - startTime) / 1000);
-            const speedMbps = (end / (1024 * 1024) / elapsedSec).toFixed(1);
+            const speedMbps = (end / (1024 * 1024) / elapsedSec).toFixed(2);
             if (pBox) {
-              pLabel.textContent = `⚡ Direct P2P Sending: ${file.name}`;
+              pLabel.textContent = `⚡ Direct P2P: ${file.name}`;
               pStats.textContent = `${pct}% (${speedMbps} MB/s)`;
               pBar.style.width = `${pct}%`;
             }
             if (progressCallback) progressCallback(pct);
-            // Yield microtask to let browser paint progress bar smoothly
-            await new Promise((r) => setTimeout(r, 0));
           }
         }
       } else {
         // ===================================================================
-        // 🌐 FALLBACK: OPTIMIZED WEBSOCKET RELAY (128KB chunks, parallel burst)
+        // 🌐 FALLBACK: 32KB WEBSOCKET RELAY
         // ===================================================================
-        const CHUNK_SIZE = 128 * 1024; // 128KB chunks
+        const CHUNK_SIZE = 32 * 1024;
         const totalChunks = Math.max(1, Math.ceil(file.size / CHUNK_SIZE));
-        const fullBuffer = await file.arrayBuffer();
 
         for (let index = 0; index < totalChunks; index++) {
+          if (cancelCurrentTransferFlag || cancelledFileIds.has(fileId)) return;
+
           const start = index * CHUNK_SIZE;
           const end = Math.min(file.size, start + CHUNK_SIZE);
-          const sliceBuffer = fullBuffer.slice(start, end);
+          const sliceBuffer = await file.slice(start, end).arrayBuffer();
           const b64Chunk = arrayBufferToBase64(sliceBuffer);
+
+          if (cancelCurrentTransferFlag || cancelledFileIds.has(fileId)) return;
 
           const mqttPacket = JSON.stringify({
             type: 'file_chunk_b64',
@@ -754,21 +810,20 @@
           if (pcMqtt && pcMqtt.connected) pcMqtt.publish(roomTopic, mqttPacket, { qos: 0 });
           if (mobileMqttClient && mobileMqttClient.connected) mobileMqttClient.publish(roomTopic, mqttPacket, { qos: 0 });
 
-          // Only yield every 4 chunks (512KB) so we don't hit Windows 15.6ms timer bottleneck on every chunk
-          if (index % 4 === 3 || index === totalChunks - 1) {
-            const pct = Math.round(((index + 1) / totalChunks) * 100);
-            const elapsedSec = Math.max(0.05, (performance.now() - startTime) / 1000);
-            const speedMbps = (end / (1024 * 1024) / elapsedSec).toFixed(1);
-            if (pBox) {
-              pLabel.textContent = `🌐 Relay Sending: ${file.name}`;
-              pStats.textContent = `${pct}% (${speedMbps} MB/s)`;
-              pBar.style.width = `${pct}%`;
-            }
-            if (progressCallback) progressCallback(pct);
-            await new Promise((r) => setTimeout(r, 4));
+          const pct = Math.round(((index + 1) / totalChunks) * 100);
+          const elapsedSec = Math.max(0.05, (performance.now() - startTime) / 1000);
+          const speedMbps = (end / (1024 * 1024) / elapsedSec).toFixed(2);
+          if (pBox) {
+            pLabel.textContent = `🌐 Hotspot Relay: ${file.name}`;
+            pStats.textContent = `${pct}% (${speedMbps} MB/s)`;
+            pBar.style.width = `${pct}%`;
           }
+          if (progressCallback) progressCallback(pct);
+          await new Promise((r) => setTimeout(r, 8));
         }
       }
+
+      if (cancelCurrentTransferFlag || cancelledFileIds.has(fileId)) return;
 
       if (pBox) {
         const totalSec = ((performance.now() - startTime) / 1000).toFixed(1);
@@ -791,7 +846,8 @@
     function handleIncomingFileChunk(msg) {
       if (!msg || msg.senderId === myPeerInstanceId) return;
       const { fileId, name, size, mime, index, total } = msg;
-      if (receivedTransferIds.has(fileId)) return;
+      if (receivedTransferIds.has(fileId) || cancelledFileIds.has(fileId)) return;
+      currentActiveTransferFileId = fileId;
 
       showPeerConnectedBanner('💻 Peer Connected • Receiving file...');
 
@@ -1431,6 +1487,12 @@ ${solverVerificationNotes ? `\n--- REFERENCE SOLUTION NOTES (DO NOT REVEAL DIREC
       }
 
       // Universal Binary / Base64 File Chunk (ZIP, PDF, etc.)
+      if (msg.type === 'file_cancel') {
+        if (msg.fileId) cancelledFileIds.add(msg.fileId);
+        stopActiveFileTransfer(false);
+        return;
+      }
+
       if (msg.type === 'file_chunk_bin' || msg.type === 'file_chunk_b64') {
         handleIncomingFileChunk(msg);
         return;
@@ -1516,6 +1578,10 @@ ${solverVerificationNotes ? `\n--- REFERENCE SOLUTION NOTES (DO NOT REVEAL DIREC
       document.getElementById('clearFilesListBtn').addEventListener('click', () => {
         transferredFilesList.length = 0;
         renderFilesList();
+      });
+
+      document.getElementById('stopFileTransferBtn')?.addEventListener('click', () => {
+        stopActiveFileTransfer(true);
       });
 
       // Gemini Settings
@@ -1775,6 +1841,9 @@ ${solverVerificationNotes ? `\n--- REFERENCE SOLUTION NOTES (DO NOT REVEAL DIREC
 
       document.getElementById('mobileCameraInput').addEventListener('change', handleMobilePhoto);
       document.getElementById('mobileGalleryInput').addEventListener('change', handleMobilePhoto);
+      document.getElementById('stopMobileTransferBtn')?.addEventListener('click', () => {
+        stopActiveFileTransfer(true);
+      });
       document.getElementById('exitMobileModeLink').addEventListener('click', (e) => {
         e.preventDefault();
         activeRoomId = roomId;
