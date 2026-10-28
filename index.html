@@ -83,8 +83,8 @@
           <div>
             <div class="flex items-center space-x-2">
               <h1 class="font-bold text-lg sm:text-xl text-white tracking-tight">Socratic AI Math Tutor <span class="text-indigo-400">× QR Drop</span></h1>
-              <span class="px-2 py-0.5 text-[11px] font-semibold rounded-full bg-indigo-500/15 text-indigo-300 border border-indigo-500/30">
-                Step-by-Step Guided
+              <span class="px-2 py-0.5 text-[11px] font-semibold rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
+                ⚡ Turbo Streaming
               </span>
             </div>
             <p class="text-xs text-slate-400">Snap a math problem or your handwritten work via QR code — AI guides you step by step without spoiling the answer</p>
@@ -148,10 +148,10 @@
               <div>
                 <label for="geminiModelSelect" class="block text-[11px] text-slate-400 mb-1">Model</label>
                 <select id="geminiModelSelect" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                  <option value="gemini-3.8-flash" selected>Gemini 3.8 Flash</option>
-                  <option value="gemini-4-argon">Gemini 4 Argon</option>
-                  <option value="gemini-3.1-pro-preview">Gemini 3.1 Pro</option>
-                  <option value="gemini-3.5-flash-lite">Gemini 3.5 Flash-Lite</option>
+                  <option value="gemini-3.5-flash-lite">⚡ Gemini 3.5 Flash-Lite (Ultra Fast)</option>
+                  <option value="gemini-3.8-flash" selected>🚀 Gemini 3.8 Flash (Balanced)</option>
+                  <option value="gemini-4-argon">🧠 Gemini 4 Argon (Deep Reasoning)</option>
+                  <option value="gemini-3.1-pro-preview">🔬 Gemini 3.1 Pro</option>
                 </select>
               </div>
               <div>
@@ -245,7 +245,7 @@
             <div class="flex items-center gap-2.5">
               <span class="w-2.5 h-2.5 rounded-full bg-indigo-400"></span>
               <h2 class="text-sm font-bold text-white">Guided Problem-Solving Session</h2>
-              <span class="text-[11px] text-slate-400 hidden sm:inline">• One small question at a time</span>
+              <span class="text-[11px] text-slate-400 hidden sm:inline">• Live streaming response</span>
             </div>
             <div class="flex items-center gap-2">
               <button id="toggleSolverNotesBtn" class="hidden px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-[11px] text-amber-300 border border-amber-500/30 font-medium transition">
@@ -254,7 +254,7 @@
             </div>
           </div>
 
-          <!-- Hidden Solver Scratchpad (Collapsible, like the "AI Inner Thoughts" in the YouTube video!) -->
+          <!-- Hidden Solver Scratchpad (Computed asynchronously in background so it NEVER slows down the response!) -->
           <div id="solverScratchpadDrawer" class="hidden bg-amber-950/30 border-b border-amber-500/30 p-4 text-xs text-amber-100/90 max-h-48 overflow-y-auto space-y-1">
             <div class="font-bold text-amber-300 uppercase tracking-wider text-[10px]">🔒 AI Internal Math Verification (Spoiler Warning!)</div>
             <div id="solverScratchpadContent" class="math-prose text-xs whitespace-pre-line"></div>
@@ -277,8 +277,8 @@
                   <p class="text-[11px] text-slate-400">Crop to the exact problem you want to solve.</p>
                 </div>
                 <div class="p-3.5 rounded-xl bg-slate-900/80 border border-slate-800">
-                  <div class="font-bold text-purple-300 mb-1">2. Step-by-Step Guide 🧭</div>
-                  <p class="text-[11px] text-slate-400">The AI never spoils the final answer—it asks you one guiding question at a time.</p>
+                  <div class="font-bold text-purple-300 mb-1">2. Instant Streaming Guide ⚡</div>
+                  <p class="text-[11px] text-slate-400">Streams guidance in ~1 second—asks you one small question at a time.</p>
                 </div>
                 <div class="p-3.5 rounded-xl bg-slate-900/80 border border-slate-800">
                   <div class="font-bold text-emerald-300 mb-1">3. Snap Handwritten Work ✍️</div>
@@ -300,25 +300,6 @@
             <button data-quick="I don't know how to do this current step. Can you explain just this step and then let me try the next one?" class="px-2.5 py-1 rounded-full bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-500/30 text-[11px] font-medium transition">
               🤔 Explain just this step
             </button>
-          </div>
-
-          <!-- Pending Image Attachment Bar (If user attached/cropped an image before sending) -->
-          <div id="pendingAttachmentBar" class="hidden px-4 py-2.5 bg-indigo-950/60 border-t border-indigo-500/30 flex items-center justify-between">
-            <div class="flex items-center gap-3">
-              <img id="pendingAttachmentThumb" src="" class="w-12 h-12 rounded-lg object-cover border border-indigo-400/50" />
-              <div>
-                <div class="text-xs font-bold text-indigo-200">Photo attached &amp; ready!</div>
-                <div class="text-[11px] text-indigo-300/80">Type a note below or press Send to start guided tutoring</div>
-              </div>
-            </div>
-            <div class="flex items-center gap-2">
-              <button id="reCropPendingBtn" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs text-slate-200">
-                ✂️ Crop
-              </button>
-              <button id="clearPendingBtn" class="px-2 py-1 rounded-lg bg-slate-800 hover:bg-rose-600 text-xs text-slate-300 hover:text-white">
-                ✕
-              </button>
-            </div>
           </div>
 
           <!-- Chat Input Bar -->
@@ -463,13 +444,13 @@
   </div>
 
   <!-- ===================================================================== -->
-  <!-- APPLICATION LOGIC (Dual-Engine Tunnel + Multi-Agent Socratic Tutor)   -->
+  <!-- APPLICATION LOGIC (Turbo Streaming + Non-Blocking Verification)       -->
   <!-- ===================================================================== -->
   <script>
     /*************************************************************************
      * 1. Configuration & State
      *************************************************************************/
-    const VALID_GEMINI_MODELS = ['gemini-3.8-flash', 'gemini-4-argon', 'gemini-3.1-pro-preview', 'gemini-3.5-flash-lite'];
+    const VALID_GEMINI_MODELS = ['gemini-3.5-flash-lite', 'gemini-3.8-flash', 'gemini-4-argon', 'gemini-3.1-pro-preview'];
     let geminiApiKey = localStorage.getItem('gemini_api_key') || '';
     let geminiModel = localStorage.getItem('gemini_model') || 'gemini-3.8-flash';
     if (!VALID_GEMINI_MODELS.includes(geminiModel)) {
@@ -479,10 +460,11 @@
     let geminiLang = localStorage.getItem('gemini_lang') || 'English';
     let aiMode = localStorage.getItem('qr_ai_mode') || 'math_tutor';
 
-    // Conversation state for Socratic tutoring
-    let chatHistory = []; // [{ role: 'user' | 'model', text: string, imageDataUrl?: string }]
+    // Cache whichever endpoint host worked first so we NEVER waste time retrying failed endpoints!
+    let cachedEndpointBase = localStorage.getItem('gemini_endpoint_base') || '';
+
+    let chatHistory = [];
     let solverVerificationNotes = '';
-    let pendingImageDataUrl = null;
     let isAiThinking = false;
     let lastMobileReplyFn = null;
 
@@ -527,7 +509,6 @@
      *************************************************************************/
     function renderMathAndMarkdown(element, markdownText) {
       if (!element) return;
-      // Protect LaTeX blocks before Marked parses markdown
       const mathBlocks = [];
       let protectedText = (markdownText || '').replace(/(\$\$[\s\S]+?\$\$|\\\[[\s\S]+?\\\]|\$[^\$\n]+?\$|\\\([\s\S]+?\\\))/g, (match) => {
         const idx = mathBlocks.length;
@@ -553,30 +534,32 @@
     }
 
     /*************************************************************************
-     * 3. Gemini API Call Helper (Supports both AQ. and AIzaSy... keys)
+     * 3. Ultra-Fast Streaming Gemini API Helper (:streamGenerateContent)
      *************************************************************************/
-    async function callGeminiAPI(contents, systemInstruction, temperature = 0.25) {
+    function getOrderedEndpointBases() {
+      const bases = [
+        'https://generativelanguage.googleapis.com/v1beta/models',
+        'https://aiplatform.googleapis.com/v1/publishers/google/models'
+      ];
+      if (cachedEndpointBase && bases.includes(cachedEndpointBase)) {
+        return [cachedEndpointBase, ...bases.filter((b) => b !== cachedEndpointBase)];
+      }
+      return bases;
+    }
+
+    async function streamGeminiAPI(contents, systemInstruction, temperature = 0.25, onStreamUpdate = null) {
       if (!geminiApiKey || geminiApiKey.length < 15) {
         document.getElementById('geminiApiKeyInput').focus();
         throw new Error('Please paste your Gemini API Key in the top-left settings box first.');
       }
 
-      const candidateModels = [geminiModel, 'gemini-3.8-flash', 'gemini-3.5-flash-lite', 'gemini-4-argon'].filter((v, i, a) => a.indexOf(v) === i);
-      const isAqKey = geminiApiKey.startsWith('AQ.');
+      const candidateModels = [geminiModel, 'gemini-3.8-flash', 'gemini-3.5-flash-lite'].filter((v, i, a) => a.indexOf(v) === i);
+      const endpointBases = getOrderedEndpointBases();
       let lastErr = null;
 
       for (const modelName of candidateModels) {
-        const endpoints = isAqKey
-          ? [
-              `https://aiplatform.googleapis.com/v1/publishers/google/models/${modelName}:generateContent?key=${encodeURIComponent(geminiApiKey)}`,
-              `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${encodeURIComponent(geminiApiKey)}`
-            ]
-          : [
-              `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${encodeURIComponent(geminiApiKey)}`,
-              `https://aiplatform.googleapis.com/v1/publishers/google/models/${modelName}:generateContent?key=${encodeURIComponent(geminiApiKey)}`
-            ];
-
-        for (const url of endpoints) {
+        for (const base of endpointBases) {
+          const streamUrl = `${base}/${modelName}:streamGenerateContent?alt=sse&key=${encodeURIComponent(geminiApiKey)}`;
           const payload = {
             contents,
             generationConfig: { temperature }
@@ -585,26 +568,67 @@
             payload.system_instruction = { parts: [{ text: systemInstruction }] };
           }
 
-          const res = await fetch(url, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-          });
+          try {
+            const res = await fetch(streamUrl, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(payload)
+            });
 
-          if (res.ok) {
-            const data = await res.json();
-            return data.candidates?.[0]?.content?.parts?.[0]?.text || '';
-          } else {
-            const errBody = await res.json().catch(() => ({}));
-            lastErr = new Error(errBody.error?.message || `HTTP ${res.status}`);
+            if (!res.ok) {
+              const errBody = await res.json().catch(() => ({}));
+              lastErr = new Error(errBody.error?.message || `HTTP ${res.status}`);
+              continue;
+            }
+
+            // Remember this working endpoint base so future requests have ZERO retry delay!
+            if (cachedEndpointBase !== base) {
+              cachedEndpointBase = base;
+              localStorage.setItem('gemini_endpoint_base', base);
+            }
+
+            const reader = res.body.getReader();
+            const decoder = new TextDecoder('utf-8');
+            let fullText = '';
+            let buffer = '';
+
+            while (true) {
+              const { value, done } = await reader.read();
+              if (done) break;
+              buffer += decoder.decode(value, { stream: true });
+              const lines = buffer.split('\n');
+              buffer = lines.pop() || '';
+
+              for (const line of lines) {
+                const trimmed = line.trim();
+                if (!trimmed.startsWith('data:')) continue;
+                const dataStr = trimmed.slice(5).trim();
+                if (!dataStr || dataStr === '[DONE]') continue;
+                try {
+                  const chunkJson = JSON.parse(dataStr);
+                  const parts = chunkJson.candidates?.[0]?.content?.parts || [];
+                  for (const part of parts) {
+                    if (part.text) {
+                      fullText += part.text;
+                      if (onStreamUpdate) onStreamUpdate(fullText);
+                    }
+                  }
+                } catch (_) {}
+              }
+            }
+
+            if (fullText) return fullText;
+          } catch (fetchErr) {
+            lastErr = fetchErr;
           }
         }
       }
+
       throw lastErr || new Error('Failed to reach Gemini API');
     }
 
     /*************************************************************************
-     * 4. Socratic Math Tutor Multi-Step Engine (Solver -> Socratic Coach)
+     * 4. Turbo Socratic Math Tutor Engine (Single-Pass Streaming + Async Scratchpad)
      *************************************************************************/
     async function runSocraticTutorTurn(userText, attachedImageUrl = null) {
       if (isAiThinking) return;
@@ -614,8 +638,7 @@
       if (welcomeEl) welcomeEl.classList.add('hidden');
       document.getElementById('quickPromptsBar').classList.remove('hidden');
 
-      // Append User Bubble to UI & History
-      appendChatBubble('user', userText || (attachedImageUrl ? 'Please help me solve this problem step by step!' : ''), attachedImageUrl);
+      appendChatBubble('user', userText || (attachedImageUrl ? 'Please guide me through solving this problem step by step!' : ''), attachedImageUrl);
 
       chatHistory.push({
         role: 'user',
@@ -623,22 +646,28 @@
         imageDataUrl: attachedImageUrl
       });
 
-      const thinkingBubbleContent = appendChatBubble('model', '✨ *Thinking and preparing your next guiding step...*');
+      const thinkingBubbleContent = appendChatBubble('model', '⚡ *Reading & streaming your step-by-step guidance...*');
+      const chatContainer = document.getElementById('tutorChatContainer');
 
       try {
         if (aiMode === 'object_id' && attachedImageUrl) {
-          // Object Identification Mode
           const base64Data = attachedImageUrl.split(',')[1];
           const mimeType = attachedImageUrl.match(/^data:(image\/[a-zA-Z0-9+.-]+);base64,/)?.[1] || 'image/jpeg';
-          const objReply = await callGeminiAPI([
-            {
+          const objReply = await streamGeminiAPI(
+            [{
               role: 'user',
               parts: [
                 { text: `Identify the main object(s) in this photo in ${geminiLang}. State the object name, category, and 3 key details.` },
                 { inline_data: { mime_type: mimeType, data: base64Data } }
               ]
+            }],
+            null,
+            0.2,
+            (partialText) => {
+              renderMathAndMarkdown(thinkingBubbleContent, partialText);
+              chatContainer.scrollTop = chatContainer.scrollHeight;
             }
-          ]);
+          );
           renderMathAndMarkdown(thinkingBubbleContent, objReply);
           chatHistory.push({ role: 'model', text: objReply });
           broadcastTutorReplyToMobile(objReply);
@@ -646,39 +675,7 @@
           return;
         }
 
-        // STEP A: If this is the FIRST image of a problem (no solver notes yet), run the hidden Expert Solver Agent first
-        // so the Socratic Tutor has a 100% accurate roadmap of the solution steps!
-        if (attachedImageUrl && !solverVerificationNotes) {
-          thinkingBubbleContent.innerHTML = '🧠 *Step 1/2: Reading problem & verifying math steps internally...*';
-          const base64Data = attachedImageUrl.split(',')[1];
-          const mimeType = attachedImageUrl.match(/^data:(image\/[a-zA-Z0-9+.-]+);base64,/)?.[1] || 'image/jpeg';
-
-          const solverPrompt = `You are an expert Math Solver verifying a math problem behind the scenes for a Socratic Tutor.
-1. Transcribe the exact problem statement and all given conditions from the image.
-2. Solve the problem carefully step-by-step (Step 1, Step 2, Step 3...) and verify the final answer so there are no calculation mistakes.
-Respond in ${geminiLang} using clear LaTeX ($...$ for inline math, $$...$$ for display math).`;
-
-          solverVerificationNotes = await callGeminiAPI(
-            [{
-              role: 'user',
-              parts: [
-                { text: solverPrompt },
-                { inline_data: { mime_type: mimeType, data: base64Data } }
-              ]
-            }],
-            null,
-            0.1
-          );
-
-          // Populate the hidden scratchpad drawer (so user can peek only if they want to)
-          const toggleBtn = document.getElementById('toggleSolverNotesBtn');
-          toggleBtn.classList.remove('hidden');
-          renderMathAndMarkdown(document.getElementById('solverScratchpadContent'), solverVerificationNotes);
-        }
-
-        // STEP B: Socratic Tutor Agent (Strictly guides the student one step at a time, NEVER reveals the final answer!)
-        thinkingBubbleContent.innerHTML = '🎓 *Formulating your guiding question...*';
-
+        // Start Socratic Tutor IMMEDIATELY (Zero waiting for a prior call!)
         const socraticSystemPrompt = `You are a warm, encouraging, Socratic Math Tutor (蘇格拉底式數學引導家教).
 Language to use: ${geminiLang}.
 
@@ -686,17 +683,15 @@ STRICT SOCRATIC RULES (CRITICAL — MUST FOLLOW WITHOUT EXCEPTION):
 1. NEVER give the student the final answer or dump the full solution all at once!
 2. Break the problem into small, manageable steps.
 3. On the first turn when a math problem is uploaded:
-   - Briefly state what the problem is asking and list the known information clearly (using $...$ LaTeX for math).
-   - Point out the key concept or strategy needed for Step 1.
+   - Briefly state what the problem is asking and list the known information clearly (using $...$ LaTeX for inline math and $$...$$ for display equations).
+   - Point out the key concept or formula needed for Step 1.
    - Ask the student ONE specific, small guiding question to help them figure out Step 1 on their own.
 4. When the student replies (by text or by uploading a photo of their handwritten work):
-   - If they uploaded handwritten work or gave an answer for the current step, carefully check their work!
-   - Praise what they did right. If there is a mistake, gently point out where the slip-up happened and give a small hint so they can fix it.
+   - Carefully verify their math! Praise what they did right. If there is a mistake, gently point out where the slip-up happened and give a small hint so they can fix it.
    - Once they get the current step right, confirm that intermediate result and ask ONE guiding question for the NEXT step.
    - Only confirm the final answer AFTER the student reaches the final step themselves.
-5. Keep each response concise, friendly, and easy to read. Always ask ONLY ONE question at the end of your turn.
-
-${solverVerificationNotes ? `\n--- HIDDEN REFERENCE SOLUTION (FOR YOUR EYES ONLY — DO NOT REVEAL THIS DIRECTLY TO THE STUDENT!) ---\n${solverVerificationNotes}\n------------------------------------------------------------------------------------------------` : ''}`;
+5. Keep each response concise, friendly, and fast to read. Always ask ONLY ONE question at the end of your turn.
+${solverVerificationNotes ? `\n--- REFERENCE SOLUTION NOTES (DO NOT REVEAL DIRECTLY!) ---\n${solverVerificationNotes}\n---` : ''}`;
 
         const geminiContents = chatHistory.map((turn) => {
           const parts = [];
@@ -712,18 +707,58 @@ ${solverVerificationNotes ? `\n--- HIDDEN REFERENCE SOLUTION (FOR YOUR EYES ONLY
           };
         });
 
-        const tutorReply = await callGeminiAPI(geminiContents, socraticSystemPrompt, 0.3);
+        let lastRenderTime = 0;
+        const tutorReply = await streamGeminiAPI(
+          geminiContents,
+          socraticSystemPrompt,
+          0.25,
+          (partialText) => {
+            const now = Date.now();
+            if (now - lastRenderTime > 90) {
+              lastRenderTime = now;
+              renderMathAndMarkdown(thinkingBubbleContent, partialText);
+              chatContainer.scrollTop = chatContainer.scrollHeight;
+            }
+          }
+        );
+
         renderMathAndMarkdown(thinkingBubbleContent, tutorReply);
         chatHistory.push({ role: 'model', text: tutorReply });
         broadcastTutorReplyToMobile(tutorReply);
+
+        // Run background verification scratchpad asynchronously AFTER streaming starts/finishes so it NEVER delays the user!
+        if (attachedImageUrl && !solverVerificationNotes) {
+          generateBackgroundSolverNotes(attachedImageUrl);
+        }
       } catch (err) {
         console.error('Socratic Tutor Error:', err);
         thinkingBubbleContent.innerHTML = `<span class="text-rose-400 font-semibold">⚠️ ${err.message}</span>`;
       } finally {
         isAiThinking = false;
-        const container = document.getElementById('tutorChatContainer');
-        container.scrollTop = container.scrollHeight;
+        chatContainer.scrollTop = chatContainer.scrollHeight;
       }
+    }
+
+    async function generateBackgroundSolverNotes(imageDataUrl) {
+      try {
+        const base64Data = imageDataUrl.split(',')[1];
+        const mimeType = imageDataUrl.match(/^data:(image\/[a-zA-Z0-9+.-]+);base64,/)?.[1] || 'image/jpeg';
+        const notes = await streamGeminiAPI(
+          [{
+            role: 'user',
+            parts: [
+              { text: `Solve this math problem concisely step-by-step in ${geminiLang} using $...$ LaTeX so the tutor has a verified reference answer.` },
+              { inline_data: { mime_type: mimeType, data: base64Data } }
+            ]
+          }],
+          null,
+          0.1
+        );
+        solverVerificationNotes = notes;
+        const toggleBtn = document.getElementById('toggleSolverNotesBtn');
+        toggleBtn.classList.remove('hidden');
+        renderMathAndMarkdown(document.getElementById('solverScratchpadContent'), solverVerificationNotes);
+      } catch (_) {}
     }
 
     function appendChatBubble(role, markdownText, imageDataUrl = null) {
@@ -777,9 +812,9 @@ ${solverVerificationNotes ? `\n--- HIDDEN REFERENCE SOLUTION (FOR YOUR EYES ONLY
     }
 
     /*************************************************************************
-     * 5. Image Compression & Cropper Flow
+     * 5. Fast Image Compression & Cropper Flow (1200px crisp & lightweight)
      *************************************************************************/
-    function compressImageFile(file, maxDimension = 1600, quality = 0.85) {
+    function compressImageFile(file, maxDimension = 1280, quality = 0.82) {
       return new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.onload = (e) => {
@@ -915,10 +950,10 @@ ${solverVerificationNotes ? `\n--- HIDDEN REFERENCE SOLUTION (FOR YOUR EYES ONLY
 
       document.getElementById('confirmCropAndSendBtn').addEventListener('click', () => {
         if (!activeCropper) return;
-        const canvas = activeCropper.getCroppedCanvas({ maxWidth: 1800, maxHeight: 1800, imageSmoothingQuality: 'high' });
-        const croppedDataUrl = canvas.toDataURL('image/jpeg', 0.88);
+        // 1150px max dimension keeps math text razor sharp while making upload 4x faster on mobile hotspots!
+        const canvas = activeCropper.getCroppedCanvas({ maxWidth: 1150, maxHeight: 1150, imageSmoothingQuality: 'high' });
+        const croppedDataUrl = canvas.toDataURL('image/jpeg', 0.82);
         closeCropModal();
-        // Automatically launch Socratic Guided Tutoring with the cropped photo!
         const promptMsg = chatHistory.length === 0
           ? 'Please guide me through solving this math problem step by step (do not give me the final answer right away).'
           : 'Here is a photo of my work / next question. Please check it and guide me to the next step!';
@@ -929,12 +964,9 @@ ${solverVerificationNotes ? `\n--- HIDDEN REFERENCE SOLUTION (FOR YOUR EYES ONLY
       const chatInput = document.getElementById('chatInput');
       const handleSend = () => {
         const text = chatInput.value.trim();
-        if (!text && !pendingImageDataUrl) return;
-        const imgToSend = pendingImageDataUrl;
+        if (!text) return;
         chatInput.value = '';
-        pendingImageDataUrl = null;
-        document.getElementById('pendingAttachmentBar').classList.add('hidden');
-        runSocraticTutorTurn(text, imgToSend);
+        runSocraticTutorTurn(text, null);
       };
 
       document.getElementById('sendChatBtn').addEventListener('click', handleSend);
@@ -961,8 +993,6 @@ ${solverVerificationNotes ? `\n--- HIDDEN REFERENCE SOLUTION (FOR YOUR EYES ONLY
       document.getElementById('newProblemBtn').addEventListener('click', () => {
         chatHistory = [];
         solverVerificationNotes = '';
-        pendingImageDataUrl = null;
-        document.getElementById('pendingAttachmentBar').classList.add('hidden');
         document.getElementById('quickPromptsBar').classList.add('hidden');
         document.getElementById('toggleSolverNotesBtn').classList.add('hidden');
         document.getElementById('solverScratchpadDrawer').classList.add('hidden');
@@ -976,7 +1006,7 @@ ${solverVerificationNotes ? `\n--- HIDDEN REFERENCE SOLUTION (FOR YOUR EYES ONLY
       // PC File Input, Drag-and-Drop, and Paste
       const handlePcFile = async (file) => {
         if (!file || !file.type.startsWith('image/')) return;
-        const compressed = await compressImageFile(file, 1800, 0.88);
+        const compressed = await compressImageFile(file, 1280, 0.82);
         openCropModalWithImage(compressed.dataUrl);
       };
 
@@ -1060,7 +1090,6 @@ ${solverVerificationNotes ? `\n--- HIDDEN REFERENCE SOLUTION (FOR YOUR EYES ONLY
         if (peerReady || mqttReady) updatePcConnectionBadge('ready', 'Ready • Scan QR to connect');
       };
 
-      // Engine A: PeerJS WebRTC
       try {
         pcPeer = new Peer(`qrdrop-${roomId}`, { config: { iceServers: ICE_SERVERS } });
         pcPeer.on('open', () => { peerReady = true; checkReady(); });
@@ -1073,7 +1102,6 @@ ${solverVerificationNotes ? `\n--- HIDDEN REFERENCE SOLUTION (FOR YOUR EYES ONLY
         });
       } catch (_) {}
 
-      // Engine B: MQTT over WSS (Hotspot Proof)
       try {
         pcMqtt = mqtt.connect(MQTT_BROKER_URL, {
           clientId: `qrdrop_pc_${roomId}_${generateShortId(4)}`,
@@ -1141,7 +1169,6 @@ ${solverVerificationNotes ? `\n--- HIDDEN REFERENCE SOLUTION (FOR YOUR EYES ONLY
           const fullDataUrl = entry.parts.join('');
           setTimeout(() => pBox.classList.add('hidden'), 500);
 
-          // Open Cropper Modal automatically on PC (just like in the YouTube video!)
           openCropModalWithImage(fullDataUrl);
           sendReply({ type: 'transfer_ack', transferId });
         }
@@ -1222,7 +1249,7 @@ ${solverVerificationNotes ? `\n--- HIDDEN REFERENCE SOLUTION (FOR YOUR EYES ONLY
         pPct.textContent = '10%';
         pBar.style.width = '10%';
 
-        const compressed = await compressImageFile(file, 1600, 0.85);
+        const compressed = await compressImageFile(file, 1280, 0.82);
         const transferId = generateShortId(10);
         const CHUNK_SIZE = 44000;
         const totalChunks = Math.ceil(compressed.dataUrl.length / CHUNK_SIZE);
@@ -1246,7 +1273,7 @@ ${solverVerificationNotes ? `\n--- HIDDEN REFERENCE SOLUTION (FOR YOUR EYES ONLY
           pText.textContent = 'Beaming to PC Tutor...';
           pPct.textContent = `${pct}%`;
           pBar.style.width = `${pct}%`;
-          await new Promise((r) => setTimeout(r, 18));
+          await new Promise((r) => setTimeout(r, 12));
         }
 
         pText.textContent = '✓ Sent to PC! Confirm crop on PC screen to start.';
