@@ -88,11 +88,11 @@
           </div>
         </div>
 
-        <!-- Mode Tabs: File Transfer vs AI Math Tutor -->
+        <!-- Mode Tabs: File Transfer & Peer Chat vs AI Math Tutor -->
         <div class="flex items-center bg-slate-900/90 p-1 rounded-xl border border-slate-800">
           <button id="tabFileDropBtn" class="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-indigo-600 text-white shadow transition flex items-center gap-1.5">
-            <span>📦</span>
-            <span>File &amp; ZIP Transfer (Notebook ⇄ PC)</span>
+            <span>📦💬</span>
+            <span>File Drop &amp; Peer Chat</span>
           </button>
           <button id="tabMathTutorBtn" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition flex items-center gap-1.5">
             <span>🎓</span>
@@ -284,6 +284,80 @@
           </div>
         </div>
 
+        <!-- 💬 REAL-TIME PEER CHAT & CLIPBOARD PASTE BOX -->
+        <div class="glass-card rounded-2xl p-5 sm:p-6 flex flex-col shadow-2xl border border-emerald-500/30 space-y-4">
+          <div class="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-slate-800">
+            <div class="flex items-center gap-2.5">
+              <div class="w-8 h-8 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-base">
+                💬
+              </div>
+              <div>
+                <div class="flex items-center gap-2">
+                  <h3 class="text-sm sm:text-base font-bold text-white">Real-Time Peer Chat &amp; Text Paste</h3>
+                  <span id="peerChatCountBadge" class="px-2 py-0.5 text-xs font-bold rounded-full bg-slate-800 text-emerald-400">0</span>
+                </div>
+                <p class="text-[11px] text-slate-400">Type or paste words, links, or code snippets to beam instantaneously to all peers in this room</p>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <div class="flex items-center gap-1.5 bg-slate-900/90 border border-slate-800 rounded-lg px-2.5 py-1">
+                <span class="text-[11px] text-slate-400">Name:</span>
+                <input
+                  id="peerNicknameInput"
+                  type="text"
+                  maxlength="24"
+                  placeholder="My Device"
+                  class="bg-transparent text-xs font-semibold text-emerald-300 focus:outline-none w-24 sm:w-28"
+                />
+              </div>
+              <button id="clearPeerChatBtn" class="text-xs text-slate-400 hover:text-rose-400 px-2 py-1 rounded-lg hover:bg-slate-800/80 transition">
+                Clear Chat
+              </button>
+            </div>
+          </div>
+
+          <!-- Messages Scroll Box -->
+          <div id="peerChatMessagesBox" class="bg-slate-950/70 border border-slate-800/90 rounded-xl p-4 h-64 sm:h-72 overflow-y-auto space-y-3 flex flex-col">
+            <div id="emptyPeerChatState" class="flex-1 flex flex-col items-center justify-center text-center text-slate-500 py-8">
+              <div class="text-2xl mb-1.5">💬</div>
+              <p class="text-xs max-w-sm leading-relaxed">
+                No messages yet. Type or paste (<kbd class="px-1.5 py-0.5 bg-slate-900 border border-slate-700 rounded text-[10px] text-slate-300">Ctrl+V</kbd>) any text below to chat in real time with connected peers!
+              </p>
+            </div>
+            <div id="peerChatList" class="hidden space-y-2.5"></div>
+          </div>
+
+          <!-- Input & Paste Bar -->
+          <div class="flex flex-col sm:flex-row items-stretch sm:items-end gap-2.5">
+            <textarea
+              id="peerChatInput"
+              rows="2"
+              placeholder="Type a message or paste text/links here... (Press Enter to send, Shift+Enter for new line)"
+              class="flex-1 bg-slate-950 border border-slate-700/90 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 resize-y min-h-[44px] max-h-40"
+            ></textarea>
+            <div class="flex items-center gap-2 shrink-0">
+              <button
+                id="pasteAndSendChatBtn"
+                type="button"
+                title="Read clipboard and send immediately"
+                class="flex-1 sm:flex-none px-3.5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 hover:text-white text-xs font-bold transition flex items-center justify-center gap-1.5"
+              >
+                <span>📋</span>
+                <span>Paste &amp; Send</span>
+              </button>
+              <button
+                id="sendPeerChatBtn"
+                type="button"
+                class="flex-1 sm:flex-none px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs sm:text-sm shadow-lg shadow-emerald-600/20 transition flex items-center justify-center gap-1.5"
+              >
+                <span>Send</span>
+                <span>➤</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
         <!-- Received & Sent Files List -->
         <div class="glass-card rounded-2xl p-6 flex-1 flex flex-col shadow-xl">
           <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-800">
@@ -450,6 +524,36 @@
             </div>
           </div>
 
+          <!-- Action 3: Real-Time Peer Chat & Text Paste on Mobile -->
+          <div class="space-y-2.5 pt-3 border-t border-slate-800">
+            <div class="flex items-center justify-between">
+              <div class="text-xs font-bold uppercase tracking-wider text-emerald-300">💬 Option 3: Real-Time Peer Chat &amp; Paste</div>
+              <span id="mobilePeerChatCountBadge" class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-slate-800 text-emerald-400">0</span>
+            </div>
+            <div id="mobilePeerChatMessagesBox" class="bg-slate-950/75 border border-slate-800 rounded-xl p-3 h-48 overflow-y-auto space-y-2.5 flex flex-col">
+              <div id="emptyMobilePeerChatState" class="flex-1 flex flex-col items-center justify-center text-center text-slate-500 py-4 text-xs">
+                Type or paste words below to chat with the connected PC!
+              </div>
+              <div id="mobilePeerChatList" class="hidden space-y-2"></div>
+            </div>
+            <div class="flex flex-col gap-2">
+              <textarea
+                id="mobilePeerChatInput"
+                rows="2"
+                placeholder="Type or paste words/links here..."
+                class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 resize-none"
+              ></textarea>
+              <div class="flex items-center gap-2">
+                <button id="mobilePasteAndSendChatBtn" type="button" class="flex-1 py-2 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs font-bold transition">
+                  📋 Paste &amp; Send
+                </button>
+                <button id="mobileSendPeerChatBtn" type="button" class="flex-1 py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow transition">
+                  Send 💬
+                </button>
+              </div>
+            </div>
+          </div>
+
           <!-- Transfer Progress & Status (Mobile / Remote View) with STOP Button -->
           <div id="mobileProgressBox" class="hidden p-4 rounded-xl bg-indigo-500/10 border border-indigo-500/30 space-y-2.5">
             <div class="flex items-center justify-between gap-2 text-xs font-semibold text-indigo-300">
@@ -595,6 +699,195 @@
     localStorage.setItem('qr_photo_drop_room_id', activeRoomId);
     const receivedTransferIds = new Set();
     const transferredFilesList = []; // { id, name, size, mime, blobUrl, direction, timestamp }
+
+    // Real-time Peer Chat State
+    const defaultDeviceLabel = (/Mobi|Android|iPhone|iPad/i.test(navigator.userAgent) ? 'Phone' : 'PC') + '-' + myPeerInstanceId.slice(0, 3);
+    let myPeerNickname = localStorage.getItem('qr_peer_nickname') || defaultDeviceLabel;
+    const peerChatMessages = []; // { msgId, senderId, senderName, text, timestamp, isSelf, delivered }
+    const receivedChatMsgIds = new Set();
+
+    function escapeHtml(str) {
+      return String(str || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function formatChatTextWithLinks(rawText) {
+      const escaped = escapeHtml(rawText);
+      return escaped.replace(/(https?:\/\/[^\s<]+)/g, (url) => {
+        return `<a href="${url}" target="_blank" rel="noopener noreferrer" class="underline text-amber-300 hover:text-amber-200 break-all font-medium">${url}</a>`;
+      });
+    }
+
+    function sendPeerChatMessage(rawText) {
+      const text = String(rawText || '').trim();
+      if (!text) return;
+
+      const roomId = targetHubRoomId || activeRoomId;
+      const msgId = generateShortId(10);
+      const timestamp = Date.now();
+      receivedChatMsgIds.add(msgId);
+
+      const chatItem = {
+        msgId,
+        senderId: myPeerInstanceId,
+        senderName: myPeerNickname || defaultDeviceLabel,
+        text,
+        timestamp,
+        isSelf: true,
+        delivered: false
+      };
+      peerChatMessages.push(chatItem);
+      renderPeerChatMessages();
+
+      const packet = {
+        type: 'peer_chat',
+        msgId,
+        senderId: myPeerInstanceId,
+        senderName: chatItem.senderName,
+        text,
+        timestamp
+      };
+
+      // 1. Send over all open WebRTC DataChannels for <5ms latency
+      activeWebRtcPeers.forEach((conn) => {
+        if (conn && conn.open) {
+          try { conn.send(packet); } catch (_) {}
+        }
+      });
+
+      // 2. Also publish on MQTT Room Bus (QoS 1) so hotspot/firewall peers always receive it
+      const roomTopic = `qrdrop/${roomId}/room_bus`;
+      const jsonStr = JSON.stringify(packet);
+      if (pcMqtt && pcMqtt.connected) pcMqtt.publish(roomTopic, jsonStr, { qos: 1 });
+      if (mobileMqttClient && mobileMqttClient.connected) mobileMqttClient.publish(roomTopic, jsonStr, { qos: 1 });
+    }
+
+    function handleIncomingPeerChat(msg, sendReply) {
+      if (!msg || !msg.msgId || msg.senderId === myPeerInstanceId) return;
+
+      // Always send delivery ACK back to sender
+      const ackPacket = {
+        type: 'peer_chat_ack',
+        msgId: msg.msgId,
+        senderId: myPeerInstanceId
+      };
+      if (sendReply) {
+        try { sendReply(ackPacket); } catch (_) {}
+      }
+      const roomId = targetHubRoomId || activeRoomId;
+      const roomTopic = `qrdrop/${roomId}/room_bus`;
+      if (pcMqtt && pcMqtt.connected) pcMqtt.publish(roomTopic, JSON.stringify(ackPacket), { qos: 0 });
+      if (mobileMqttClient && mobileMqttClient.connected) mobileMqttClient.publish(roomTopic, JSON.stringify(ackPacket), { qos: 0 });
+
+      if (receivedChatMsgIds.has(msg.msgId)) return;
+      receivedChatMsgIds.add(msg.msgId);
+
+      showPeerConnectedBanner(`💬 Message from ${msg.senderName || 'Peer'}`);
+
+      peerChatMessages.push({
+        msgId: msg.msgId,
+        senderId: msg.senderId,
+        senderName: msg.senderName || `Peer-${String(msg.senderId || '').slice(0, 3)}`,
+        text: msg.text || '',
+        timestamp: msg.timestamp || Date.now(),
+        isSelf: false,
+        delivered: true
+      });
+      renderPeerChatMessages();
+    }
+
+    function handleIncomingPeerChatAck(msg) {
+      if (!msg || !msg.msgId || msg.senderId === myPeerInstanceId) return;
+      const target = peerChatMessages.find((m) => m.msgId === msg.msgId);
+      if (target && !target.delivered) {
+        target.delivered = true;
+        renderPeerChatMessages(false);
+      }
+    }
+
+    function renderPeerChatMessages(scrollToBottom = true) {
+      const targets = [
+        {
+          countEl: document.getElementById('peerChatCountBadge'),
+          emptyEl: document.getElementById('emptyPeerChatState'),
+          listEl: document.getElementById('peerChatList'),
+          boxEl: document.getElementById('peerChatMessagesBox')
+        },
+        {
+          countEl: document.getElementById('mobilePeerChatCountBadge'),
+          emptyEl: document.getElementById('emptyMobilePeerChatState'),
+          listEl: document.getElementById('mobilePeerChatList'),
+          boxEl: document.getElementById('mobilePeerChatMessagesBox')
+        }
+      ];
+
+      targets.forEach(({ countEl, emptyEl, listEl, boxEl }) => {
+        if (!listEl) return;
+        if (countEl) countEl.textContent = peerChatMessages.length;
+
+        if (peerChatMessages.length === 0) {
+          if (emptyEl) emptyEl.classList.remove('hidden');
+          listEl.classList.add('hidden');
+          listEl.innerHTML = '';
+          return;
+        }
+
+        if (emptyEl) emptyEl.classList.add('hidden');
+        listEl.classList.remove('hidden');
+        listEl.innerHTML = '';
+
+        peerChatMessages.forEach((m) => {
+          const timeStr = new Date(m.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+          const row = document.createElement('div');
+          row.className = `flex flex-col ${m.isSelf ? 'items-end' : 'items-start'}`;
+
+          const bubble = document.createElement('div');
+          bubble.className = m.isSelf
+            ? 'max-w-[90%] sm:max-w-[82%] rounded-2xl rounded-tr-sm bg-emerald-600/25 border border-emerald-500/40 text-slate-100 px-3.5 py-2.5 shadow-md space-y-1.5'
+            : 'max-w-[90%] sm:max-w-[82%] rounded-2xl rounded-tl-sm bg-slate-900/95 border border-indigo-500/35 text-slate-100 px-3.5 py-2.5 shadow-md space-y-1.5';
+
+          const statusHtml = m.isSelf
+            ? `<span class="text-[10px] font-semibold ${m.delivered ? 'text-emerald-300' : 'text-slate-400'}">${m.delivered ? '✓ Delivered' : '• Sent'}</span>`
+            : '';
+
+          bubble.innerHTML = `
+            <div class="flex items-center justify-between gap-3 text-[10px] text-slate-400">
+              <div class="flex items-center gap-1.5">
+                <span class="font-bold ${m.isSelf ? 'text-emerald-300' : 'text-indigo-300'}">${escapeHtml(m.isSelf ? `${m.senderName} (You)` : m.senderName)}</span>
+                <span>•</span>
+                <span>${timeStr}</span>
+                ${statusHtml}
+              </div>
+              <button type="button" data-copy-chat="${escapeHtml(m.msgId)}" class="px-2 py-0.5 rounded bg-slate-800/90 hover:bg-slate-700 text-slate-200 hover:text-white text-[10px] font-semibold border border-slate-700 transition shrink-0">
+                📋 Copy
+              </button>
+            </div>
+            <div class="text-xs sm:text-sm text-slate-100 whitespace-pre-wrap break-words leading-relaxed select-text font-sans">${formatChatTextWithLinks(m.text)}</div>
+          `;
+
+          const copyBtn = bubble.querySelector('[data-copy-chat]');
+          if (copyBtn) {
+            copyBtn.addEventListener('click', () => {
+              navigator.clipboard.writeText(m.text);
+              const orig = copyBtn.innerHTML;
+              copyBtn.innerHTML = '✓ Copied!';
+              setTimeout(() => { copyBtn.innerHTML = orig; }, 1500);
+            });
+          }
+
+          row.appendChild(bubble);
+          listEl.appendChild(row);
+        });
+
+        if (scrollToBottom && boxEl) {
+          boxEl.scrollTop = boxEl.scrollHeight;
+        }
+      });
+    }
 
     /*************************************************************************
      * 2. Workspace Tab Switching (File Drop vs Math Tutor)
@@ -1661,6 +1954,17 @@ ${solverVerificationNotes ? `\n--- REFERENCE SOLUTION NOTES (DO NOT REVEAL DIREC
         return;
       }
 
+      // Real-Time Peer-to-Peer Chat & Clipboard Paste
+      if (msg.type === 'peer_chat') {
+        handleIncomingPeerChat(msg, sendReply);
+        return;
+      }
+
+      if (msg.type === 'peer_chat_ack') {
+        handleIncomingPeerChatAck(msg);
+        return;
+      }
+
       // Universal Binary / Base64 File Chunk (ZIP, PDF, etc.)
       if (msg.type === 'file_cancel') {
         if (msg.fileId) cancelledFileIds.add(msg.fileId);
@@ -1785,6 +2089,55 @@ ${solverVerificationNotes ? `\n--- REFERENCE SOLUTION NOTES (DO NOT REVEAL DIREC
 
       document.getElementById('stopFileTransferBtn')?.addEventListener('click', () => {
         stopActiveFileTransfer(true);
+      });
+
+      // 💬 Real-Time Peer Chat & Clipboard Controls (Desktop / Notebook Hub)
+      const peerNicknameInput = document.getElementById('peerNicknameInput');
+      if (peerNicknameInput) {
+        peerNicknameInput.value = myPeerNickname;
+        peerNicknameInput.addEventListener('input', (e) => {
+          myPeerNickname = e.target.value.trim() || defaultDeviceLabel;
+          localStorage.setItem('qr_peer_nickname', myPeerNickname);
+        });
+      }
+
+      const peerChatInput = document.getElementById('peerChatInput');
+      const handleSendPeerChat = () => {
+        if (!peerChatInput) return;
+        const text = peerChatInput.value.trim();
+        if (!text) return;
+        sendPeerChatMessage(text);
+        peerChatInput.value = '';
+        peerChatInput.focus();
+      };
+
+      document.getElementById('sendPeerChatBtn')?.addEventListener('click', handleSendPeerChat);
+      peerChatInput?.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+          e.preventDefault();
+          handleSendPeerChat();
+        }
+      });
+
+      document.getElementById('pasteAndSendChatBtn')?.addEventListener('click', async () => {
+        try {
+          const clipText = await navigator.clipboard.readText();
+          if (clipText && clipText.trim()) {
+            sendPeerChatMessage(clipText);
+          } else if (peerChatInput) {
+            peerChatInput.focus();
+          }
+        } catch (_) {
+          if (peerChatInput) {
+            peerChatInput.focus();
+            peerChatInput.placeholder = 'Press Ctrl+V here to paste your clipboard, then hit Enter!';
+          }
+        }
+      });
+
+      document.getElementById('clearPeerChatBtn')?.addEventListener('click', () => {
+        peerChatMessages.length = 0;
+        renderPeerChatMessages();
       });
 
       // Gemini Settings
@@ -1976,6 +2329,16 @@ ${solverVerificationNotes ? `\n--- REFERENCE SOLUTION NOTES (DO NOT REVEAL DIREC
               aiBox.classList.remove('hidden');
               document.getElementById('mobileAiObjectDesc').textContent = msg.details || '';
             }
+            if (msg.type === 'peer_chat') {
+              handleIncomingPeerChat(msg, (reply) => {
+                if (mobileMqttClient && mobileMqttClient.connected) {
+                  mobileMqttClient.publish(roomTopic, JSON.stringify(reply), { qos: 0 });
+                }
+              });
+            }
+            if (msg.type === 'peer_chat_ack') {
+              handleIncomingPeerChatAck(msg);
+            }
           } catch (_) {}
         });
       } catch (_) {}
@@ -1989,6 +2352,14 @@ ${solverVerificationNotes ? `\n--- REFERENCE SOLUTION NOTES (DO NOT REVEAL DIREC
             activeWebRtcPeers.set(conn.peer, conn);
             conn.send({ type: 'hello', senderId: myPeerInstanceId, roomId });
             setMobileConnected('Direct P2P');
+          });
+          conn.on('data', (msg) => {
+            if (!msg || msg.senderId === myPeerInstanceId) return;
+            if (msg.type === 'peer_chat') {
+              handleIncomingPeerChat(msg, (reply) => conn.send(reply));
+            } else if (msg.type === 'peer_chat_ack') {
+              handleIncomingPeerChatAck(msg);
+            }
           });
         });
       } catch (_) {}
@@ -2063,6 +2434,40 @@ ${solverVerificationNotes ? `\n--- REFERENCE SOLUTION NOTES (DO NOT REVEAL DIREC
       document.getElementById('stopMobileTransferBtn')?.addEventListener('click', () => {
         stopActiveFileTransfer(true);
       });
+
+      // Option 3: Mobile Real-Time Peer Chat & Paste
+      const mChatInput = document.getElementById('mobilePeerChatInput');
+      const handleMobileSendChat = () => {
+        if (!mChatInput) return;
+        const text = mChatInput.value.trim();
+        if (!text) return;
+        sendPeerChatMessage(text);
+        mChatInput.value = '';
+        mChatInput.focus();
+      };
+      document.getElementById('mobileSendPeerChatBtn')?.addEventListener('click', handleMobileSendChat);
+      mChatInput?.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+          e.preventDefault();
+          handleMobileSendChat();
+        }
+      });
+      document.getElementById('mobilePasteAndSendChatBtn')?.addEventListener('click', async () => {
+        try {
+          const clipText = await navigator.clipboard.readText();
+          if (clipText && clipText.trim()) {
+            sendPeerChatMessage(clipText);
+          } else if (mChatInput) {
+            mChatInput.focus();
+          }
+        } catch (_) {
+          if (mChatInput) {
+            mChatInput.focus();
+            mChatInput.placeholder = 'Long-press here to paste, then tap Send!';
+          }
+        }
+      });
+
       document.getElementById('exitMobileModeLink').addEventListener('click', (e) => {
         e.preventDefault();
         activeRoomId = roomId;
